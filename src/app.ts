@@ -78,7 +78,10 @@ class App {
         }
 
         // TODO (when email validation is done): check in the database that
-        // the user exists and  his email is confirmed
+        // the user exists and his email is confirmed
+
+        // make the verified user id available when handling the request
+        req.body.id = id
 
         // everything went well and the JWT is valid
         next()
