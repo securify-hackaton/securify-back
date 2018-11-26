@@ -8,18 +8,6 @@ export class UsersController{
   public addNewUser (req: Request, res: Response) {                
     let newUser = new User(req.body)
     
-    if (!req.body.password) {
-      res.status(400).send('password is required')
-      return
-    }
-    
-    if (req.body.password.length < 8) {
-      res.status(400).send('password must be at least 8 characters')
-      return
-    }
-
-    newUser.setPassword(req.body.password)
-    
     newUser.save((err, user) => {
       if (err) {
         console.log('saving user failed:', err.message)
@@ -67,11 +55,6 @@ export class UsersController{
 
     if (!user) {
       res.status(401).json({ message: 'user does not exist' })
-      return
-    }
-
-    if (!user.validPassword(password)) {
-      res.status(401).json({ message: 'invalid password' })
       return
     }
 

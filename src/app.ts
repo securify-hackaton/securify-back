@@ -8,7 +8,6 @@ import * as morgan from "morgan"
 import * as jsonwebtoken from "jsonwebtoken"
 
 import { Routes } from "./routes"
-import { IMessage, Message } from "./models/Message"
 import { jwtOptions } from "./config/jwt"
 
 class App {
@@ -49,6 +48,10 @@ class App {
   private authSetup(): void {
     // Requires a valid JSON Web Token for any route except login and register
     this.app.use((req, res, next) => {
+      next()
+      return
+      
+      // removed for now
       const { authorization } = req.headers
 
       if (!authorization) {
@@ -125,7 +128,8 @@ class App {
 
     this.io.on('connect', (socket: any) => {
       console.log('Connected client on port %s.', port)
-      socket.on('message', this.handleNewMessage)
+      // socket.on('message', this.handleNewMessage)
+      socket.on('message', (msg) => console.log(msg))
 
       socket.on('disconnect', () => {
         console.log('Client disconnected')
@@ -133,55 +137,55 @@ class App {
     })
   }
 
-  private handleNewMessage = (m: IMessage | string) => {
-    let newMessage: IMessage
-    try {
-      newMessage = new Message(m)
-    } catch (e) {
-      console.log('error parsing the message')
-      this.io.emit('error', e)
-      return
-    }
+  // private handleNewMessage = (m: IMessage | string) => {
+  //   let newMessage: IMessage
+  //   try {
+  //     newMessage = new Message(m)
+  //   } catch (e) {
+  //     console.log('error parsing the message')
+  //     this.io.emit('error', e)
+  //     return
+  //   }
 
-    const tokenParts = newMessage.token.split(' ')
-    if (tokenParts.length !== 2) {
-      this.io.emit('error', 'malformed token, should be like "bearer __token_value__"')
-      return
-    }
-    const token = {
-      type: tokenParts[0],
-      value: tokenParts[1]
-    }
+  //   const tokenParts = newMessage.token.split(' ')
+  //   if (tokenParts.length !== 2) {
+  //     this.io.emit('error', 'malformed token, should be like "bearer __token_value__"')
+  //     return
+  //   }
+  //   const token = {
+  //     type: tokenParts[0],
+  //     value: tokenParts[1]
+  //   }
 
-    let decoded
-    try {
-      decoded = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
-    } catch (e) {
-      this.io.emit('error', e)
-      return
-    }
+  //   let decoded
+  //   try {
+  //     decoded = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
+  //   } catch (e) {
+  //     this.io.emit('error', e)
+  //     return
+  //   }
 
-    if (!decoded.id) {
-      console.log('error getting the id from the token')
-      this.io.emit('error', 'invalid JWT')
-      return
-    }
+  //   if (!decoded.id) {
+  //     console.log('error getting the id from the token')
+  //     this.io.emit('error', 'invalid JWT')
+  //     return
+  //   }
 
-    newMessage.from = mongoose.Types.ObjectId(decoded.id)
+  //   newMessage.from = mongoose.Types.ObjectId(decoded.id)
 
-    console.log('[server](message): %s', newMessage.content)
+  //   console.log('[server](message): %s', newMessage.content)
 
-    newMessage.save((err, msg) => {
-      if (err) {
-        console.log('error saving the message:', err)
-        this.io.emit('error', err)
-      } else {
-        console.log('message created', msg._id)
-        this.io.emit('message', msg)
-      }
-    })
+  //   newMessage.save((err, msg) => {
+  //     if (err) {
+  //       console.log('error saving the message:', err)
+  //       this.io.emit('error', err)
+  //     } else {
+  //       console.log('message created', msg._id)
+  //       this.io.emit('message', msg)
+  //     }
+  //   })
     // this.io.emit('message', m)
-  }
+  // }
 }
 
 export default new App().app
