@@ -9,7 +9,7 @@ export class Routes {
     app.route('/')
       .get((_: Request, res: Response) => {
         res.status(200).send({
-          message: 'WorkHearth API v0.0.2'
+          message: 'Gilet Jaune API v0.0.2'
         })
       })
 
