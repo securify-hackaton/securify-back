@@ -1,14 +1,14 @@
-import * as bodyParser from "body-parser"
-import * as express from "express"
-import * as mongoose from "mongoose"
-import * as socketIo from "socket.io"
-import { createServer, Server } from "http"
-import * as cors from "cors"
-import * as morgan from "morgan"
-import * as jsonwebtoken from "jsonwebtoken"
+import * as bodyParser from 'body-parser'
+import * as express from 'express'
+import * as mongoose from 'mongoose'
+import * as socketIo from 'socket.io'
+import { createServer, Server } from 'http'
+import * as cors from 'cors'
+import * as morgan from 'morgan'
+import * as jsonwebtoken from 'jsonwebtoken'
 
-import { Routes } from "./routes"
-import { jwtOptions } from "./config/jwt"
+import { Routes } from './routes'
+import { jwtOptions } from './config/jwt'
 
 class App {
   private server: Server
@@ -17,10 +17,10 @@ class App {
   private io: SocketIO.Server
 
   public app: express.Application
-  
+
   constructor() {
     if (!this.mongoUrl) {
-      throw new Error("MONGODB_URI is mandatory")
+      throw new Error('MONGODB_URI is mandatory')
     }
     this.app = express()
     this.config()
@@ -50,7 +50,7 @@ class App {
     this.app.use((req, res, next) => {
       next()
       return
-      
+
       // removed for now
       const { authorization } = req.headers
 
@@ -80,7 +80,7 @@ class App {
           res.status(401).send('invalid token')
           return
         }
-        
+
         // TODO (when email validation is done): check in the database that
         // the user exists and  his email is confirmed
 
@@ -115,7 +115,7 @@ class App {
     try {
       // Setting the default PORT to 3000
       if (!process.env.PORT) {
-        throw new Error("PORT is mandatory")
+        throw new Error('PORT is mandatory')
       }
       port = parseInt(process.env.PORT, 10)
     } catch (e) {

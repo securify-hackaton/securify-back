@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from "express"
+import { Request, Response, NextFunction } from 'express'
 
-import { UsersController } from "../controllers/usersController"
+import { UsersController } from '../controllers/usersController'
 
-export class Routes { 
-  public usersController: UsersController = new UsersController() 
-  
+export class Routes {
+  public usersController: UsersController = new UsersController()
+
   public routes(app): void {
     app.route('/')
       .get((_: Request, res: Response) => {
@@ -15,7 +15,7 @@ export class Routes {
 
     app.route('/login')
       .post(this.usersController.login)
-    
+
     app.route('/users')
       .get((req: Request, _: Response, next: NextFunction) => {
         // middleware

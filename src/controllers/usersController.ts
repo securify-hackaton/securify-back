@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
-import jsonwebtoken = require("jsonwebtoken")
+import jsonwebtoken = require('jsonwebtoken')
 
-import { User, IUser } from "../models/User"
-import { jwtOptions } from "../config/jwt"
+import { User, IUser } from '../models/User'
+import { jwtOptions } from '../config/jwt'
 
-export class UsersController{
-  public addNewUser (req: Request, res: Response) {                
-    let newUser = new User(req.body)
-    
+export class UsersController {
+  public addNewUser (req: Request, res: Response) {
+    const newUser = new User(req.body)
+
     newUser.save((err, user) => {
       if (err) {
         console.log('saving user failed:', err.message)
@@ -17,12 +17,12 @@ export class UsersController{
         }
         res.status(500).send(err)
         return
-      }    
+      }
       res.status(201).json(user)
     })
   }
 
-  public getUsers (_: Request, res: Response) {           
+  public getUsers (_: Request, res: Response) {
     User.find({}, (err, user) => {
       if (err) {
         res.send(err)
@@ -36,7 +36,7 @@ export class UsersController{
       res.status(400).send('email is mandatory')
       return
     }
-    
+
     if (!req.body.password) {
       res.status(400).send('password is mandatory')
       return
@@ -58,8 +58,8 @@ export class UsersController{
       return
     }
 
-    var payload = { id: user._id }
-    var token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
+    const payload = { id: user._id }
+    const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
     // TODO: save token hash in the database to prevent forgery
     res.json({ message: 'ok', token: `bearer ${token}` })
   }

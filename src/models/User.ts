@@ -1,5 +1,5 @@
-import { Schema, Document, model, Model } from 'mongoose';
-import { pbkdf2, randomBytes, pbkdf2Sync } from 'crypto';
+import { Schema, Document, model, Model } from 'mongoose'
+import { pbkdf2, randomBytes, pbkdf2Sync } from 'crypto'
 
 export const UserSchema = new Schema({
   email: {
@@ -35,7 +35,7 @@ export const UserSchema = new Schema({
     type: Date,
     default: Date.now
   }
-});
+})
 
 UserSchema.methods = {
 }
