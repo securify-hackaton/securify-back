@@ -9,7 +9,7 @@ export class Routes {
     app.route('/')
       .get((_: Request, res: Response) => {
         res.status(200).send({
-          message: 'Gilet Jaune API v0.0.2'
+          message: 'Gilet Jaune API v0.0.1'
         })
       })
 
@@ -29,5 +29,12 @@ export class Routes {
       .get(this.usersController.getUserByID)
       .put(this.usersController.updateUser)
       .delete(this.usersController.deleteUser)
+
+    app.route('/users/:userId/image')
+      .get()
+      .delete()
+    
+    app.route('/users/:userId/recognition')
+      .post()
   }
 }

@@ -18,7 +18,14 @@ export class UsersController {
         res.status(500).send(err)
         return
       }
-      res.status(201).json(user)
+
+      const payload = { id: user._id }
+      const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
+
+      res.status(201).json({
+        user,
+        token: `bearer ${token}`
+      })
     })
   }
 
@@ -37,12 +44,11 @@ export class UsersController {
       return
     }
 
-    if (!req.body.password) {
-      res.status(400).send('password is mandatory')
-      return
+    if (!req.body.image) {
+      res.status(400).send('image is mandatory')
     }
 
-    const { password, email } = req.body
+    const { image, email } = req.body
 
     let user: IUser
 
@@ -57,6 +63,8 @@ export class UsersController {
       res.status(401).json({ message: 'user does not exist' })
       return
     }
+
+    // TODO: recognize image
 
     const payload = { id: user._id }
     const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express'
-import fs from 'fs'
+const fs = require('fs')
 import { User, IUser } from '../models/User'
 const uuidv1 = require('uuid/v1')
 
@@ -51,5 +51,4 @@ export class ImagesController {
             res.status(400).json({ message: 'user do not exist' })
         }
     }
-
 }
