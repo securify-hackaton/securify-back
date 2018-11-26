@@ -48,10 +48,6 @@ class App {
   private authSetup(): void {
     // Requires a valid JSON Web Token for any route except login and register
     this.app.use((req, res, next) => {
-      next()
-      return
-
-      // removed for now
       const { authorization } = req.headers
 
       if (!authorization) {
