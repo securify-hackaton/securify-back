@@ -1,5 +1,6 @@
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
+import { Request, Response, NextFunction } from 'express'
 import * as mongoose from 'mongoose'
 import * as socketIo from 'socket.io'
 import { createServer, Server } from 'http'
@@ -47,7 +48,7 @@ class App {
 
   private authSetup(): void {
     // Requires a valid JSON Web Token for any route except login and register
-    this.app.use((req, res, next) => {
+    this.app.use((req: Request, res: Response, next: NextFunction) => {
       const { authorization } = req.headers
 
       if (!authorization) {

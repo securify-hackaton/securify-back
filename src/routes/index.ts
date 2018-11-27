@@ -29,12 +29,5 @@ export class Routes {
       .get(this.usersController.getUserByID)
       .put(this.usersController.updateUser)
       .delete(this.usersController.deleteUser)
-
-    app.route('/users/:userId/image')
-      .get()
-      .delete()
-    
-    app.route('/users/:userId/recognition')
-      .post()
   }
 }
