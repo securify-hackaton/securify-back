@@ -1,9 +1,11 @@
 import { Request, Response, NextFunction } from 'express'
 
 import { UsersController } from '../controllers/usersController'
+import { ImagesController } from '../controllers/imagesController'
 
 export class Routes {
   public usersController: UsersController = new UsersController()
+  public imageController: ImagesController = new ImagesController()
 
   public routes(app): void {
     app.route('/')
@@ -30,5 +32,14 @@ export class Routes {
       .get(this.usersController.getUserByID)
       .put(this.usersController.updateUser)
       .delete(this.usersController.deleteUser)
+
+    app.route('/image')
+      .post(this.imageController.AddImage.bind(this.imageController))
+      .delete(this.imageController.RemoveImage.bind(this.imageController))
+
+
+    app.route('/authenticate')
+      .post(this.imageController.VerifyFace.bind(this.imageController))
+
   }
 }
