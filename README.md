@@ -75,3 +75,7 @@ returns
     user: User
 }
 ```
+
+## Create a developer account
+
+https://dreamy-roentgen-d1d1ed.netlify.com/
