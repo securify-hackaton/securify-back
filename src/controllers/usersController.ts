@@ -40,12 +40,12 @@ export class UsersController {
 
   public async login (req: Request, res: Response) {
     if (!req.body.email) {
-      res.status(400).send('email is mandatory')
+      res.status(400).send({ message: 'email is mandatory' })
       return
     }
 
     if (!req.body.image) {
-      res.status(400).send('image is mandatory')
+      res.status(400).send({ message: 'image is mandatory' })
     }
 
     const { image, email } = req.body
@@ -75,12 +75,12 @@ export class UsersController {
   public getUserByID (req: Request, res: Response) {
     User.findById(req.params.userId, (err, user) => {
       if (err) {
-        res.send(err)
+        res.send({ message: err })
         return
       }
 
       if (!user) {
-        res.status(404).send(`user not found: ${req.params.userId}`)
+        res.status(404).send({ message: `user not found: ${req.params.userId}` })
         return
       }
 
@@ -91,7 +91,7 @@ export class UsersController {
   public updateUser (req: Request, res: Response) {
     User.findOneAndUpdate({ _id: req.params.userId }, req.body, { new: true }, (err, user) => {
       if (err) {
-        res.send(err)
+        res.send({ message: err })
       }
       res.json(user)
     })
@@ -100,7 +100,7 @@ export class UsersController {
   public deleteUser (req: Request, res: Response) {
     User.deleteOne({ _id: req.params.userId }, (err) => {
       if (err) {
-        res.send(err)
+        res.send({ message: err })
       }
       res.json({ message: 'Successfully deleted user!'})
     })

@@ -27,7 +27,7 @@ export class FacialController {
         try {
             return await User.findById(req.body.id)
         } catch {
-            res.status(400).json({ message: 'user do not exist' })
+            res.status(400).json({ message: 'user does not exist' })
         }
     }
 }

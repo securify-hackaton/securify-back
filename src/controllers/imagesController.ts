@@ -39,7 +39,7 @@ export class ImagesController {
             if (err) {
                 res.status(500).send('Unable to delete image')
             } else {
-                res.status(200)
+                res.status(200).send('ok')
             }
         })
     }
