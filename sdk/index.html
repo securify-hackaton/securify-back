@@ -18,6 +18,8 @@
         <input type="text" v-model="name" /><br>
         <label>Logo</label><br>
         <input type="text" v-model="logo" placeholder="https://abcd.efgh/ijkl.jpg" /><br>
+        <label>POST Callback URL</label><br>
+        <input type="text" v-model="callback" placeholder="https://abcd.efgh/callback" /><br>
         <template v-if="error">
             <br>
             <p class="error" v-html="error" />

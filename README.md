@@ -58,6 +58,24 @@ returns
 }
 ```
 
+**Authorize**
+
+Ask for an authentication
+```
+POST /authorize
+{
+    privateKey: string
+    publicKey: string
+    userEmail: string
+}
+```
+returns
+```
+{
+    requestID: string
+}
+```
+
 ## Authenticated routes
 
 All other routes require a token in the `Authorization` header.

@@ -10,7 +10,11 @@ export const CompanySchema = new Schema({
     type: String,
     required: 'image URL required'
   },
-  publicKey: {
+  callback: {
+    type: String,
+    required: 'callback URL required'
+  },
+  salt: {
     type: String
   },
   hash: {
@@ -54,7 +58,9 @@ CompanySchema.methods = {
 export interface ICompany extends Document {
   name: string
   image: string
+  callback: string
   hash: string
+  salt: string
   created_date: Date
   validPassword: (password: string) => boolean
   setPassword: (password: string) => void

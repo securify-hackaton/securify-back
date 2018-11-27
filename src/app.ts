@@ -63,6 +63,11 @@ class App {
           next()
           return
         }
+        // authorization demand => ok
+        if (req.method === 'POST' && req.originalUrl === '/authorize') {
+          next()
+          return
+        }
         res.status(401).send('the Authorization header is mandatory')
         return
       }

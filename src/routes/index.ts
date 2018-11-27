@@ -3,10 +3,12 @@ import { Request, Response, NextFunction } from 'express'
 import { UsersController } from '../controllers/usersController'
 import cors = require('cors')
 import { CompanyController } from '../controllers/companyController'
+import { AuthController } from '../controllers/authController'
 
 export class Routes {
   public usersController: UsersController = new UsersController()
   public companyController: CompanyController = new CompanyController()
+  public authController: AuthController = new AuthController()
 
   public routes(app): void {
     app.options('*', cors())
@@ -45,5 +47,7 @@ export class Routes {
 
     app.route('/company')
       .post(this.companyController.addNewCompany)
+    app.route('/authorize')
+      .post(this.authController.authorize)
   }
 }

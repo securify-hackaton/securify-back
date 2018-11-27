@@ -31,7 +31,7 @@ export class CompanyController {
 
       res.status(201).json({
         privateKey,
-        publicKey: company.hash.substr(0, 16)
+        publicKey: company._id
       })
     })
   }
