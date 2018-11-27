@@ -7,9 +7,10 @@ export class Routes {
 
   public routes(app): void {
     app.route('/')
-      .get((_: Request, res: Response) => {
+      .get((req: Request, res: Response) => {
         res.status(200).send({
-          message: 'Gilet Jaune API v0.0.1'
+          message: 'Gilet Jaune API v0.0.1',
+          user: req.body.user
         })
       })
 

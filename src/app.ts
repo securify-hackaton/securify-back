@@ -10,6 +10,7 @@ import * as jsonwebtoken from 'jsonwebtoken'
 
 import { Routes } from './routes'
 import { jwtOptions } from './config/jwt'
+import { User } from './models/User'
 
 class App {
   private server: Server
@@ -48,7 +49,7 @@ class App {
 
   private authSetup(): void {
     // Requires a valid JSON Web Token for any route except login and register
-    this.app.use((req: Request, res: Response, next: NextFunction) => {
+    this.app.use(async (req: Request, res: Response, next: NextFunction) => {
       const { authorization } = req.headers
 
       if (!authorization) {
@@ -56,13 +57,13 @@ class App {
           next()
           return
         }
-        res.status(401).send('AUTHORIZATION header is mandatory')
+        res.status(401).send('the Authorization header is mandatory')
         return
       }
 
       const tokenParts = authorization.split(' ')
       if (tokenParts.length !== 2) {
-        res.status(401).send('the AUTHORIZATION header should be formed of token type, followed by the token value: "bearer [my_token]"')
+        res.status(401).send('the Authorization header should be formed of token type, followed by the token value: "bearer [my_token]"')
         return
       }
 
@@ -74,24 +75,36 @@ class App {
       try {
         const { id } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
         if (!id) {
-          res.status(401).send('invalid token')
+          res.status(401).send({ message: 'invalid token' })
           return
         }
 
-        // TODO (when email validation is done): check in the database that
-        // the user exists and his email is confirmed
+        try {
+          // TODO (when email validation is done): check in the database that
+          // the user email is confirmed
+          const usr = await User.findById(id).exec()
 
-        // make the verified user id available when handling the request
-        req.body.id = id
+          if (!usr) {
+            res.status(401).send({ message: 'user not found' })
+            return
+          }
+
+          // make the verified user available when handling the request
+          req.body.user = usr
+        } catch (e) {
+          res.status(501).send({ message: 'database error: ' + e })
+          return
+        }
 
         // everything went well and the JWT is valid
         next()
 
         // log after the next() for more organized logs
         console.log('Authenticated user id:', id)
+        return
       } catch (e) {
         console.log('error decoding the JWT:', e)
-        res.status(401).send('error decoding the token')
+        res.status(401).send({ message: 'error decoding the token' })
         return
       }
     })
