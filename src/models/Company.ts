@@ -54,7 +54,6 @@ CompanySchema.methods = {
 export interface ICompany extends Document {
   name: string
   image: string
-  publicKey: string
   hash: string
   created_date: Date
   validPassword: (password: string) => boolean

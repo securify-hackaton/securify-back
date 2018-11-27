@@ -4,19 +4,9 @@ import jsonwebtoken = require('jsonwebtoken')
 import { Company, ICompany } from '../models/Company'
 import { jwtOptions } from '../config/jwt'
 
-export class CompanyController {
+export class CompanysController {
   public addNewCompany (req: Request, res: Response) {
     const newCompany = new Company(req.body)
-
-    let privateKey = ''
-
-    for (let i = 0; i < 5; i++) {
-      privateKey = `${privateKey}${Math.random().toString(36).substr(2, 8)}`
-    }
-
-    privateKey = privateKey.replace(/\./g, '')
-
-    newCompany.setPassword(privateKey)
 
     newCompany.save((err, company) => {
       if (err) {
@@ -29,10 +19,7 @@ export class CompanyController {
         return
       }
 
-      res.status(201).json({
-        privateKey,
-        publicKey: company.hash.substr(0, 16)
-      })
+      res.status(201).json(company)
     })
   }
 
@@ -58,24 +45,6 @@ export class CompanyController {
       }
 
       res.json(company)
-    })
-  }
-
-  public updateCompany (req: Request, res: Response) {
-    Company.findOneAndUpdate({ _id: req.params.companyId }, req.body, { new: true }, (err, company) => {
-      if (err) {
-        res.send(err)
-      }
-      res.json(company)
-    })
-  }
-
-  public deleteCompany (req: Request, res: Response) {
-    Company.deleteOne({ _id: req.params.companyId }, (err) => {
-      if (err) {
-        res.send(err)
-      }
-      res.json({ message: 'Successfully deleted company!'})
     })
   }
 }

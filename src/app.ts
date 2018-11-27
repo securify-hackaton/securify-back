@@ -53,7 +53,13 @@ class App {
       const { authorization } = req.headers
 
       if (!authorization) {
+        // register, login => ok
         if (req.method === 'POST' && (req.originalUrl === '/users' || req.originalUrl === '/login')) {
+          next()
+          return
+        }
+        // create a developper account => ok
+        if (req.method === 'POST' && req.originalUrl === '/company') {
           next()
           return
         }
