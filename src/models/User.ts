@@ -1,4 +1,5 @@
 import { Schema, Document, model, Model } from 'mongoose'
+import { pbkdf2Sync, randomBytes } from 'crypto';
 
 export const UserSchema = new Schema({
   email: {
@@ -30,6 +31,12 @@ export const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+  salt: {
+    type: String
+  },
+  hash: {
+    type: String
+  },
   created_date: {
     type: Date,
     default: Date.now
@@ -37,6 +44,32 @@ export const UserSchema = new Schema({
 })
 
 UserSchema.methods = {
+  validPassword(password: string) {
+    if (!this.hash) return false
+
+    const hash = pbkdf2Sync(
+      password,
+      this.salt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    return hash.toString('hex') === this.hash
+  },
+
+  setPassword(password: string) {
+    this.salt = randomBytes(16).toString('hex')
+    const hash = pbkdf2Sync(
+      password,
+      this.salt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    this.hash = hash.toString('hex')
+  },
 }
 
 export interface IUser extends Document {
@@ -47,7 +80,11 @@ export interface IUser extends Document {
   deviceId: string
   deviceType: string
   emailValidated: boolean
+  hash: string
+  salt: string
   created_date: Date
+  validPassword: (password: string) => boolean
+  setPassword: (password: string) => void
 }
 
 export const User: Model<IUser> = model<IUser>('User', UserSchema, 'user')

@@ -44,11 +44,11 @@ export class UsersController {
       return
     }
 
-    if (!req.body.image) {
-      res.status(400).send({ message: 'image is mandatory' })
+    if (!req.body.password) {
+      res.status(400).send({ message: 'password is mandatory' })
     }
 
-    const { image, email } = req.body
+    const { password, email } = req.body
 
     let user: IUser
 
@@ -64,7 +64,9 @@ export class UsersController {
       return
     }
 
-    // TODO: recognize image
+    if (!user.validPassword(password)) {
+      res.status(401).json({ message: 'invalid password' })
+    }
 
     const payload = { id: user._id }
     const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)

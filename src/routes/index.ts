@@ -4,6 +4,7 @@ import { UsersController } from '../controllers/usersController'
 import cors = require('cors')
 import { CompanyController } from '../controllers/companyController'
 import { AuthController } from '../controllers/authController'
+import express = require('express');
 
 export class Routes {
   public usersController: UsersController = new UsersController()
@@ -12,9 +13,6 @@ export class Routes {
 
   public routes(app): void {
     app.options('*', cors())
-    // app.options(/(.*)/, cors())
-    // app.route(/(.*)/).options((_: Request, res: Response) =>
-    //     res.status(200).send({ message: 'ok' }))
     app.route('/')
       .get((req: Request, res: Response) => {
         res.status(200).send({
@@ -27,6 +25,8 @@ export class Routes {
           }
         })
       })
+
+    app.use('/sdk', express.static('sdk'))
 
     app.route('/login')
       .post(this.usersController.login)

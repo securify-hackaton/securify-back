@@ -68,6 +68,11 @@ class App {
           next()
           return
         }
+        // sdk website => ok
+        if (req.method === 'GET' && /\/sdk(.*)/.test(req.originalUrl)) {
+          next()
+          return
+        }
         res.status(401).send('the Authorization header is mandatory')
         return
       }
