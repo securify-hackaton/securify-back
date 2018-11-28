@@ -5,7 +5,7 @@ const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
-import { User } from '../models/User'
+import { Image } from '../models/Image'
 
 export class ImagesController {
     faceApi: any
@@ -21,14 +21,20 @@ export class ImagesController {
             return
         }
 
-        const user = await this.getUser(req, res)
+        const user = req.body.user
         if (!user) return
 
         try {
             const fileName = './img/' + uuidv1()
             fs.writeFile(fileName, req.files.image.data, async (err) => {
                 if (err) throw err
-                user.images.push(fileName)
+                const image = new Image()
+                image.path = fileName
+                image.faceId = await this.getFaceId(req.files.image.data)
+                console.log(image.faceId)
+                image.faceIdCreationDate = new Date()
+                await image.save()
+                user.images.push(image.id)
                 await user.save()
                 res.status(200).send()
             })
@@ -45,11 +51,13 @@ export class ImagesController {
             return
         }
 
-        const user = await this.getUser(req, res)
+        const user = req.body.user
         if (!user) return
+        await user.populate('images').execPopulate()
 
         try {
-            fs.unlink(user.images[req.body.imageIndex], async (err) => {
+            fs.unlink(user.images[req.body.imageIndex].path, async (err) => {
+                await user.images[req.body.imageIndex].remove()
                 user.images.splice(req.body.imageIndex, 1)
                 await user.save()
                 res.status(200).send({message: 'Successfully deleted images'})
@@ -65,8 +73,9 @@ export class ImagesController {
             return
         }
 
-        const user = await this.getUser(req, res)
+        const user = req.body.user
         if (!user) return
+        await user.populate('images').execPopulate()
 
         try {
             const toCheckFaceId = await this.getFaceId(req.files.image.data)
@@ -82,8 +91,18 @@ export class ImagesController {
             let confidence = 0
 
             for (let i = 0, length = imgModels.length; i < length; i++) {
-                const file = await readFile(imgModels[i])
-                const faceId = await this.getFaceId(file)
+                const ttl = (Math.abs(imgModels[i].faceIdCreationDate.valueOf() - new Date().valueOf()) / 1000 / 60 / 60)
+                let faceId
+                if (imgModels[i].faceId && ttl < 23) {
+                    faceId = imgModels[i].faceId
+                } else {
+                    const file = await readFile(imgModels[i].path)
+                    faceId = await this.getFaceId(file)
+                    imgModels[i].faceId = faceId
+                    imgModels[i].faceIdCreationDate = new Date()
+                    await imgModels[i].save()
+                }
+
                 const comparison = await this.compareFaces(toCheckFaceId, faceId)
                 if (comparison.isIdentical) {
                     numberIdentical++
@@ -91,7 +110,10 @@ export class ImagesController {
                 confidence += comparison.confidence
             }
 
-            if (numberIdentical >= Math.floor(imgModels.length / 2) || confidence > 0.3 * imgModels.length) {
+            console.log('number identical : ' + numberIdentical)
+            console.log('confidence : ' + confidence / imgModels.length)
+
+            if (numberIdentical >= Math.ceil(imgModels.length / 2) ||  (confidence / imgModels.length) > 0.5 ) {
                 res.status(200).send()
             } else {
                 res.status(400).send({message: 'Not the same person'})
@@ -127,12 +149,4 @@ export class ImagesController {
         const res = await this.faceApi.detect(payload)
         return res[0].faceId
      }
-
-    private async getUser(req: Request, res: Response) {
-        try {
-            return await User.findById(req.body.id)
-        } catch {
-            res.status(400).json({ message: 'user do not exist' })
-        }
-    }
 }
