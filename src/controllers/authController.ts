@@ -56,10 +56,14 @@ export class AuthController {
       return
     }
 
+    const expirationDate = new Date()
+    expirationDate.setDate(expirationDate.getDate() + 1)
+
     let newAuthorization = new Authorization({
       company: company._id,
       user: user._id,
-      status: AuthStatus.Pending
+      status: AuthStatus.Pending,
+      expirationDate
     })
 
     try {
@@ -83,7 +87,8 @@ export class AuthController {
     try {
       const authorizations = await Authorization.find({
         user: user._id,
-        status: AuthStatus.Ok
+        status: AuthStatus.Ok,
+        expirationDate: { $gt: new Date() }
       }).exec()
 
       // populate simultaneously all authorizations' companies
@@ -111,7 +116,8 @@ export class AuthController {
     try {
       const authorizations = await Authorization.find({
         user: user._id,
-        status: AuthStatus.Pending
+        status: AuthStatus.Pending,
+        expirationDate: { $gt: new Date() }
       }).exec()
 
       // populate simultaneously all authorizations' companies
