@@ -1,3 +1,5 @@
+require('dotenv').config()
+import * as fileUpload from 'express-fileupload'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { Request, Response, NextFunction } from 'express'
@@ -7,7 +9,6 @@ import { createServer, Server } from 'http'
 import * as cors from 'cors'
 import * as morgan from 'morgan'
 import * as jsonwebtoken from 'jsonwebtoken'
-
 import { Routes } from './routes'
 import { jwtOptions } from './config/jwt'
 import { User } from './models/User'
@@ -39,6 +40,7 @@ class App {
     this.app.use(morgan('combined'))
     this.app.use(bodyParser.json())
     this.app.use(bodyParser.urlencoded({ extended: false }))
+    this.app.use(fileUpload())
   }
 
   private jwtSetup(): void {

@@ -1,4 +1,5 @@
 import { Schema, Document, model, Model } from 'mongoose'
+import { IImage } from './Image'
 
 export const UserSchema = new Schema({
   email: {
@@ -15,7 +16,7 @@ export const UserSchema = new Schema({
     type: String
   },
   images: {
-    type: Array,
+    type: [{ type: Schema.Types.ObjectId, ref: 'Image' }],
     default: []
   },
   deviceId: {
@@ -43,7 +44,7 @@ export interface IUser extends Document {
   email: string
   firstname: string
   lastname: string
-  images: Array<string>
+  images: Array<IImage>
   deviceId: string
   deviceType: string
   emailValidated: boolean
