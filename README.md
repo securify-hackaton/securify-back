@@ -156,3 +156,59 @@ returns
     user: User
 }
 ```
+
+**Pending Authorizations**
+
+Pending authorizations for the logged in user
+```
+GET /tokens/pending
+```
+returns
+```
+[
+    {
+        _id: ObjectId
+        expirationDate: Date
+        company: {
+            name: string
+            image: string
+        }
+    }
+]
+```
+
+**Active Authorizations**
+
+Active authorizations for the logged in user
+```
+GET /tokens/active
+```
+returns
+```
+[
+    {
+        _id: ObjectId
+        expirationDate: Date
+        company: {
+            name: string
+            image: string
+        }
+    }
+]
+```
+
+**Revoke an Authorization**
+
+Unvalidate any of the logged in user's tokens
+```
+POST /tokens/revoke
+{
+    tokenId: ObjectId
+}
+```
+returns
+```
+{
+    message: string
+}
+```

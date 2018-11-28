@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { ICompany, Company } from '../models/Company'
-import { Authorization, AuthStatus } from '../models/Authorization'
+import { Authorization, AuthStatus, IAuthorization } from '../models/Authorization'
 import { User, IUser } from '../models/User'
 
 export class AuthController {
@@ -130,6 +130,50 @@ export class AuthController {
     } catch (e) {
       console.log(`couldn't fetch pending tokens for user ${user} ===>> ${e}`)
       res.status(500).send({ message: 'error fetching the pending tokens' })
+    }
+  }
+
+  public async revokeToken(req: Request, res: Response) {
+    const user: IUser = req.body.user
+    const { tokenId } = req.body
+
+    if (!tokenId) {
+      res.status(400).send({ message: 'tokenId is mandatory' })
+      return
+    }
+
+    let auth: IAuthorization
+
+    try {
+      auth = await Authorization.findById(tokenId).exec()
+    } catch (e) {
+      const message = `couldn't fetch authorization ${tokenId}`
+      res.status(500).send({ message })
+      return
+    }
+
+    if (!auth) {
+      const message = `authorization ${tokenId} does not exist`
+      res.status(400).send({ message })
+      return
+    }
+
+    if (auth.user !== user._id) {
+      res.status(401).send({ message: 'this is not your token !!' })
+      return
+    }
+
+    auth.status = AuthStatus.Revoked
+
+    try {
+      await auth.save()
+      res.status(200).send({ message: 'revoked' })
+      return
+    } catch (e) {
+      console.log('error saving the auth:', e)
+      const message = 'could not revoke the token: database error'
+      res.status(500).send({ message })
+      return
     }
   }
 }

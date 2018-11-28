@@ -59,10 +59,13 @@ export class Routes {
     app.route('/authenticate')
       .post(this.imageController.verifyFace.bind(this.imageController))
 
-      app.route('/tokens/pending')
+    app.route('/tokens/pending')
       .get(this.authController.getAllPendingTokensForUser)
 
-      app.route('/tokens/active')
-        .get(this.authController.getAllActiveTokensForUser)
+    app.route('/tokens/active')
+      .get(this.authController.getAllActiveTokensForUser)
+
+    app.route('/tokens/revoke')
+      .post(this.authController.revokeToken)
   }
 }
