@@ -24,6 +24,7 @@ export class AuthController {
     try {
       company = await Company.findById(publicKey).exec()
     } catch (e) {
+      console.log(e)
       const errorMsg = `didn't find company with public key ${publicKey}`
       res.status(401).json({ message: errorMsg })
       return

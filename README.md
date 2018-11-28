@@ -123,7 +123,7 @@ npm run start
 # Create a dev account
 # Name: full text name, e.g. "EPSI"
 # Logo: image URL, e.g. "https://pbs.twimg.com/profile_images/1024649812988387328/QWQbqff7_400x400.jpg"
-# Callback URL: http://localhost:3001
+# Callback URL: http://localhost:3001/callback
 http://localhost:3000/sdk
 
 # Don't close the tab, you will need the public and private key!
