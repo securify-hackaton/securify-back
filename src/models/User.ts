@@ -9,10 +9,10 @@ export const UserSchema = new Schema({
     required: "email can't be blank",
     match: [/\S+@\S+\.\S+/, 'email is invalid']
   },
-  firstname: {
+  firstName: {
     type: String
   },
-  lastname: {
+  lastName: {
     type: String
   },
   images: {
@@ -37,7 +37,7 @@ export const UserSchema = new Schema({
   hash: {
     type: String
   },
-  created_date: {
+  createdDate: {
     type: Date,
     default: Date.now
   }
@@ -74,8 +74,8 @@ UserSchema.methods = {
 
 export interface IUser extends Document {
   email: string
-  firstname: string
-  lastname: string
+  firstName: string
+  lastName: string
   images: Array<string>
   deviceId: string
   deviceType: string

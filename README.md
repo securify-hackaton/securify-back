@@ -10,8 +10,8 @@ POST /users
     email: string
     deviceId: string
     deviceType: string
-    firstname: string [OPTIONAL]
-    lastname: string [OPTIONAL]
+    firstName: string [OPTIONAL]
+    lastName: string [OPTIONAL]
 }
 ```
 returns

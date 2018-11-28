@@ -20,7 +20,7 @@ export const CompanySchema = new Schema({
   hash: {
     type: String
   },
-  created_date: {
+  createdDate: {
     type: Date,
     default: Date.now
   }
@@ -61,7 +61,7 @@ export interface ICompany extends Document {
   callback: string
   hash: string
   salt: string
-  created_date: Date
+  createdDate: Date
   validPassword: (password: string) => boolean
   setPassword: (password: string) => void
 }
