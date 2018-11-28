@@ -6,7 +6,7 @@ const readFile = promisify(fs.readFile)
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
 import { Image } from '../models/Image'
-import { IUser } from 'models/User';
+import { IUser } from 'models/User'
 
 export class ImagesController {
     faceApi: any
@@ -58,7 +58,7 @@ export class ImagesController {
 
         let index = -1
         for (let i = 0; i < user.images.length; i++) {
-            if (user.images[i].faceId === req.body.faceId){
+            if (user.images[i].faceId === req.body.faceId) {
                 index = 1
                 break
             }
