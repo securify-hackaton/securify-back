@@ -1,15 +1,17 @@
 import { Request, Response, NextFunction } from 'express'
+import cors = require('cors')
+import express = require('express')
 
 import { UsersController } from '../controllers/usersController'
-import cors = require('cors')
+import { ImagesController } from '../controllers/imagesController'
 import { CompanyController } from '../controllers/companyController'
 import { AuthController } from '../controllers/authController'
-import express = require('express')
 
 export class Routes {
   public usersController: UsersController = new UsersController()
   public companyController: CompanyController = new CompanyController()
   public authController: AuthController = new AuthController()
+  public imageController: ImagesController = new ImagesController()
 
   public routes(app): void {
     app.options('*', cors())
@@ -49,5 +51,12 @@ export class Routes {
       .post(this.companyController.addNewCompany)
     app.route('/authorize')
       .post(this.authController.authorize)
+
+    app.route('/image')
+      .post(this.imageController.addImage.bind(this.imageController))
+      .delete(this.imageController.removeImage.bind(this.imageController))
+
+    app.route('/authenticate')
+      .post(this.imageController.verifyFace.bind(this.imageController))
   }
 }
