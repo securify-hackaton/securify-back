@@ -1,4 +1,4 @@
 export default {
-    apiKey: '648eb5213a444a3c8e55e491447ed052',
+    apiKey: process.env.AZURE_KEY,
     endpoint: 'westcentralus.api.cognitive.microsoft.com'
   }
