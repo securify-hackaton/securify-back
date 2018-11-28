@@ -73,7 +73,6 @@ export class AuthController {
 
     const message = `Demande d'authorisation de connexion sur ${company.name}`
     NotificationServer.sendNotification(user.deviceId, message, {})
-    // TODO: send a push notification
 
     res.status(200).json({
       requestId: newAuthorization._id
