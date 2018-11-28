@@ -4,7 +4,6 @@ import * as bodyParser from 'body-parser'
 import * as express from 'express'
 import { Request, Response, NextFunction } from 'express'
 import * as mongoose from 'mongoose'
-import * as socketIo from 'socket.io'
 import { createServer, Server } from 'http'
 import * as cors from 'cors'
 import * as morgan from 'morgan'
@@ -17,7 +16,6 @@ class App {
   private server: Server
   private routePrv: Routes = new Routes()
   private mongoUrl: string = process.env.MONGODB_URI
-  private io: SocketIO.Server
 
   public app: express.Application
 
@@ -31,7 +29,7 @@ class App {
     this.routePrv.routes(this.app)
     this.jwtSetup()
     this.mongoSetup()
-    this.socketSetup()
+    this.serverSetup()
     this.listen()
   }
 
@@ -55,7 +53,23 @@ class App {
       const { authorization } = req.headers
 
       if (!authorization) {
+        // register, login => ok
         if (req.method === 'POST' && (req.originalUrl === '/users' || req.originalUrl === '/login')) {
+          next()
+          return
+        }
+        // create a developper account => ok
+        if (req.method === 'POST' && req.originalUrl === '/company') {
+          next()
+          return
+        }
+        // authorization demand => ok
+        if (req.method === 'POST' && req.originalUrl === '/authorize') {
+          next()
+          return
+        }
+        // sdk website => ok
+        if (req.method === 'GET' && /\/sdk(.*)/.test(req.originalUrl)) {
           next()
           return
         }
@@ -120,9 +134,8 @@ class App {
     mongoose.connect(this.mongoUrl, option)
   }
 
-  private socketSetup(): void {
+  private serverSetup(): void {
     this.server = createServer(this.app)
-    this.io = socketIo(this.server)
   }
 
   private listen(): void {
@@ -140,67 +153,7 @@ class App {
     this.server.listen(port, () => {
       console.log('Running server on port %s', port)
     })
-
-    this.io.on('connect', (socket: any) => {
-      console.log('Connected client on port %s.', port)
-      // socket.on('message', this.handleNewMessage)
-      socket.on('message', (msg) => console.log(msg))
-
-      socket.on('disconnect', () => {
-        console.log('Client disconnected')
-      })
-    })
   }
-
-  // private handleNewMessage = (m: IMessage | string) => {
-  //   let newMessage: IMessage
-  //   try {
-  //     newMessage = new Message(m)
-  //   } catch (e) {
-  //     console.log('error parsing the message')
-  //     this.io.emit('error', e)
-  //     return
-  //   }
-
-  //   const tokenParts = newMessage.token.split(' ')
-  //   if (tokenParts.length !== 2) {
-  //     this.io.emit('error', 'malformed token, should be like "bearer __token_value__"')
-  //     return
-  //   }
-  //   const token = {
-  //     type: tokenParts[0],
-  //     value: tokenParts[1]
-  //   }
-
-  //   let decoded
-  //   try {
-  //     decoded = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
-  //   } catch (e) {
-  //     this.io.emit('error', e)
-  //     return
-  //   }
-
-  //   if (!decoded.id) {
-  //     console.log('error getting the id from the token')
-  //     this.io.emit('error', 'invalid JWT')
-  //     return
-  //   }
-
-  //   newMessage.from = mongoose.Types.ObjectId(decoded.id)
-
-  //   console.log('[server](message): %s', newMessage.content)
-
-  //   newMessage.save((err, msg) => {
-  //     if (err) {
-  //       console.log('error saving the message:', err)
-  //       this.io.emit('error', err)
-  //     } else {
-  //       console.log('message created', msg._id)
-  //       this.io.emit('message', msg)
-  //     }
-  //   })
-    // this.io.emit('message', m)
-  // }
 }
 
 export default new App().app

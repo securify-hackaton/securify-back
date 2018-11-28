@@ -4,9 +4,19 @@ import jsonwebtoken = require('jsonwebtoken')
 import { Company, ICompany } from '../models/Company'
 import { jwtOptions } from '../config/jwt'
 
-export class CompanysController {
+export class CompanyController {
   public addNewCompany (req: Request, res: Response) {
     const newCompany = new Company(req.body)
+
+    let privateKey = ''
+
+    for (let i = 0; i < 5; i++) {
+      privateKey = `${privateKey}${Math.random().toString(36).substr(2, 8)}`
+    }
+
+    privateKey = privateKey.replace(/\./g, '')
+
+    newCompany.setPassword(privateKey)
 
     newCompany.save((err, company) => {
       if (err) {
@@ -19,7 +29,10 @@ export class CompanysController {
         return
       }
 
-      res.status(201).json(company)
+      res.status(201).json({
+        privateKey,
+        publicKey: company._id
+      })
     })
   }
 

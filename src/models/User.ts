@@ -1,4 +1,5 @@
 import { Schema, Document, model, Model } from 'mongoose'
+import { pbkdf2Sync, randomBytes } from 'crypto'
 import { IImage } from './Image'
 
 export const UserSchema = new Schema({
@@ -9,10 +10,10 @@ export const UserSchema = new Schema({
     required: "email can't be blank",
     match: [/\S+@\S+\.\S+/, 'email is invalid']
   },
-  firstname: {
+  firstName: {
     type: String
   },
-  lastname: {
+  lastName: {
     type: String
   },
   images: {
@@ -31,24 +32,60 @@ export const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
-  created_date: {
+  salt: {
+    type: String
+  },
+  hash: {
+    type: String
+  },
+  createdDate: {
     type: Date,
     default: Date.now
   }
 })
 
 UserSchema.methods = {
+  validPassword(password: string) {
+    if (!this.hash) return false
+
+    const hash = pbkdf2Sync(
+      password,
+      this.salt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    return hash.toString('hex') === this.hash
+  },
+
+  setPassword(password: string) {
+    this.salt = randomBytes(16).toString('hex')
+    const hash = pbkdf2Sync(
+      password,
+      this.salt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    this.hash = hash.toString('hex')
+  },
 }
 
 export interface IUser extends Document {
   email: string
-  firstname: string
-  lastname: string
+  firstName: string
+  lastName: string
   images: Array<IImage>
   deviceId: string
   deviceType: string
   emailValidated: boolean
+  hash: string
+  salt: string
   created_date: Date
+  validPassword: (password: string) => boolean
+  setPassword: (password: string) => void
 }
 
 export const User: Model<IUser> = model<IUser>('User', UserSchema, 'user')
