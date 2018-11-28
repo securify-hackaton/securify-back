@@ -6,6 +6,7 @@ const readFile = promisify(fs.readFile)
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
 import { Image } from '../models/Image'
+import { IUser } from 'models/User';
 
 export class ImagesController {
     faceApi: any
@@ -15,7 +16,7 @@ export class ImagesController {
     }
 
     // Add a image for the current user in azure cloud
-    public async AddImage(req: any, res: Response) {
+    public async addImage(req: any, res: Response) {
         if (!req.files.image) {
             res.status(400).send({message: 'Image is mandatory'})
             return
@@ -44,16 +45,26 @@ export class ImagesController {
     }
 
     // Delete any information saved on azure microsoft.
-    public async RemoveImage(req: Request, res: Response) {
+    public async removeImage(req: Request, res: Response) {
 
-        if (req.body.imageIndex === null || req.body.imageIndex === undefined) {
-            res.status(400).send({message: 'Image index is mandatory'})
+        if (req.body.faceId) {
+            res.status(400).send({message: 'Image fadeId is mandatory'})
             return
         }
 
-        const user = req.body.user
+        const user: IUser = req.body.user
         if (!user) return
         await user.populate('images').execPopulate()
+
+        let index = -1
+        for (let i = 0; i < user.images.length; i++) {
+            if (user.images[i].faceId === req.body.faceId){
+                index = 1
+                break
+            }
+        }
+
+        if (index == -1) return res.status(404).send({message: 'Image not found'})
 
         try {
             fs.unlink(user.images[req.body.imageIndex].path, async (err) => {
@@ -67,7 +78,7 @@ export class ImagesController {
         }
     }
 
-    public async VerifyFace(req: any, res: Response) {
+    public async verifyFace(req: any, res: Response) {
         if (!req.files.image) {
             res.status(400).send({message: 'Image is mandatory'})
             return

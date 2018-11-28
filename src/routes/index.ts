@@ -34,12 +34,12 @@ export class Routes {
       .delete(this.usersController.deleteUser)
 
     app.route('/image')
-      .post(this.imageController.AddImage.bind(this.imageController))
-      .delete(this.imageController.RemoveImage.bind(this.imageController))
+      .post(this.imageController.addImage.bind(this.imageController))
+      .delete(this.imageController.removeImage.bind(this.imageController))
 
 
     app.route('/authenticate')
-      .post(this.imageController.VerifyFace.bind(this.imageController))
+      .post(this.imageController.verifyFace.bind(this.imageController))
 
   }
 }
