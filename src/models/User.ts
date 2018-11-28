@@ -1,5 +1,5 @@
 import { Schema, Document, model, Model } from 'mongoose'
-import { pbkdf2Sync, randomBytes } from 'crypto';
+import { pbkdf2Sync, randomBytes } from 'crypto'
 
 export const UserSchema = new Schema({
   email: {
