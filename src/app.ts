@@ -90,10 +90,10 @@ class App {
 
       try {
         const {
-          id
+          userId
         } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
 
-        if (!id) {
+        if (!userId) {
           res.status(401).send({ message: 'invalid token' })
           return
         }
@@ -101,7 +101,7 @@ class App {
         try {
           // TODO (when email validation is done): check in the database that
           // the user email is confirmed
-          const usr = await User.findById(id).exec()
+          const usr = await User.findById(userId).exec()
 
           if (!usr) {
             res.status(401).send({ message: 'user not found' })
@@ -119,7 +119,7 @@ class App {
         next()
 
         // log after the next() for more organized logs
-        console.log('Authenticated user id:', id)
+        console.log('Authenticated user id:', userId)
         return
       } catch (e) {
         console.log('error decoding the JWT:', e)

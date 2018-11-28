@@ -69,7 +69,7 @@ export class UsersController {
       res.status(401).json({ message: 'invalid password' })
     }
 
-    const payload = { id: user._id }
+    const payload = { userId: user._id }
     const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
     // TODO: save token hash in the database to prevent forgery
     res.json({ message: 'ok', token: `bearer ${token}` })
@@ -92,6 +92,10 @@ export class UsersController {
   }
 
   public updateUser (req: Request, res: Response) {
+    if (req.body.user._id !== req.params.userId) {
+      res.status(401).send({ message: 'hop hop hop !' })
+    }
+
     User.findOneAndUpdate({ _id: req.params.userId }, req.body, { new: true }, (err, user) => {
       if (err) {
         res.send({ message: err })
@@ -101,6 +105,10 @@ export class UsersController {
   }
 
   public deleteUser (req: Request, res: Response) {
+    if (req.body.user._id !== req.params.userId) {
+      res.status(401).send({ message: 'hop hop hop !' })
+    }
+
     User.deleteOne({ _id: req.params.userId }, (err) => {
       if (err) {
         res.send({ message: err })
