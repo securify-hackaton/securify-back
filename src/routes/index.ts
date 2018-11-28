@@ -4,7 +4,7 @@ import { UsersController } from '../controllers/usersController'
 import cors = require('cors')
 import { CompanyController } from '../controllers/companyController'
 import { AuthController } from '../controllers/authController'
-import express = require('express');
+import express = require('express')
 
 export class Routes {
   public usersController: UsersController = new UsersController()
