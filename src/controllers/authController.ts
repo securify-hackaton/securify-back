@@ -158,7 +158,7 @@ export class AuthController {
       return
     }
 
-    if (auth.user !== user._id) {
+    if (auth.user.toString() !== user._id.toString()) {
       res.status(401).send({ message: 'this is not your token !!' })
       return
     }
