@@ -1,4 +1,3 @@
-require('dotenv').config()
 import * as fileUpload from 'express-fileupload'
 import * as bodyParser from 'body-parser'
 import * as express from 'express'
@@ -8,9 +7,11 @@ import { createServer, Server } from 'http'
 import * as cors from 'cors'
 import * as morgan from 'morgan'
 import * as jsonwebtoken from 'jsonwebtoken'
+
 import { Routes } from './routes'
 import { jwtOptions } from './config/jwt'
 import { User } from './models/User'
+import { Authorization, AuthStatus } from './models/Authorization'
 
 class App {
   private server: Server
@@ -90,29 +91,64 @@ class App {
 
       try {
         const {
-          userId
+          // will be either an user or a token
+          userId,
+          tokenId
         } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
 
-        if (!userId) {
+        if (!userId && !tokenId) {
           res.status(401).send({ message: 'invalid token' })
           return
         }
 
-        try {
-          // TODO (when email validation is done): check in the database that
-          // the user email is confirmed
-          const usr = await User.findById(userId).exec()
+        if (userId) {
+          try {
+            // TODO (when email validation is done): check in the database that
+            // the user email is confirmed
+            const usr = await User.findById(userId).exec()
 
-          if (!usr) {
-            res.status(401).send({ message: 'user not found' })
+            if (!usr) {
+              res.status(401).send({ message: 'user not found' })
+              return
+            }
+
+            // make the verified user available when handling the request
+            req.body.user = usr
+          } catch (e) {
+            res.status(501).send({ message: 'database error: ' + e })
             return
           }
+        }
 
-          // make the verified user available when handling the request
-          req.body.user = usr
-        } catch (e) {
-          res.status(501).send({ message: 'database error: ' + e })
-          return
+        if (tokenId) {
+          try {
+            const auth = await Authorization.findById(tokenId)
+
+            if (!auth) {
+              res.status(401).send({ message: 'token not found' })
+              return
+            }
+
+            if (auth.status === AuthStatus.Revoked) {
+              res.status(401).send({ message: 'token revoked' })
+              return
+            }
+
+            if (new Date(auth.expirationDate) < new Date()) {
+              res.status(401).send({ message: 'token expired' })
+              return
+            }
+
+            await auth.populate('company').execPopulate()
+            await auth.populate('user').execPopulate()
+
+            // make the known information available when handling the request
+            req.body.user = auth.user
+            req.body.company = auth.company
+            req.body.token = auth
+          } catch (e) {
+            res.status(501).send({ message: 'database error: ' + e })
+          }
         }
 
         // everything went well and the JWT is valid
