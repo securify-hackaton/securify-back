@@ -1,3 +1,4 @@
+var companyURL = 'http://localhost:3000/company'
 var app = new Vue({
   el: '#app',
   data: () => ({
@@ -44,7 +45,7 @@ var app = new Vue({
       console.log(this.name, this.logo)
 
       try {
-        const result = await axios.post('http://localhost:3000/company', {
+        const result = await axios.post(companyURL, {
           name: this.name,
           image: this.logo,
           callback: this.callback
