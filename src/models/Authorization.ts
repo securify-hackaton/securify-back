@@ -1,6 +1,13 @@
 import { Types, Schema, Document, model, Model } from 'mongoose'
-import { IUser, User } from './User'
-import { ICompany, Company } from './Company'
+import { IUser } from './User'
+import { ICompany } from './Company'
+
+export const AuthStatus = {
+  Pending: 'PENDING',
+  Denied: 'DENIED',
+  Ok: 'OK',
+  Revoked: 'REVOKED'
+}
 
 export const AuthorizationSchema = new Schema({
   company: {
@@ -15,13 +22,13 @@ export const AuthorizationSchema = new Schema({
   },
   status: {
     type: String,
-    required: 'status must be one of PENDING, DENIED, OK'
+    required: 'status must be one of PENDING, DENIED, OK, REVOKED'
   },
   createdDate: {
     type: Date,
     default: Date.now
   },
-  modifiedDate: {
+  expirationDate: {
     type: Date,
     default: Date.now
   }
@@ -31,11 +38,11 @@ AuthorizationSchema.methods = {
 }
 
 export interface IAuthorization extends Document {
-  company: Types.ObjectId | ICompany
-  user: Types.ObjectId | IUser
+  company: ICompany | Types.ObjectId | any
+  user: IUser | Types.ObjectId
   status: string
   createdDate: Date
-  modifiedDate: Date
+  expirationDate: Date
 }
 
 export const Authorization: Model<IAuthorization> = model<IAuthorization>('Authorization', AuthorizationSchema, 'authorization')

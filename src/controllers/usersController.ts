@@ -19,7 +19,8 @@ export class UsersController {
         return
       }
 
-      const payload = { id: user._id }
+      // todo: save token in database and get inserted _id
+      const payload = { userId: user._id }
       const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
 
       res.status(201).json({

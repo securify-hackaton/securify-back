@@ -89,7 +89,10 @@ class App {
       }
 
       try {
-        const { id } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
+        const {
+          id
+        } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
+
         if (!id) {
           res.status(401).send({ message: 'invalid token' })
           return

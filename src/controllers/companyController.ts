@@ -1,5 +1,4 @@
 import { Request, Response } from 'express'
-import jsonwebtoken = require('jsonwebtoken')
 
 import { Company, ICompany } from '../models/Company'
 import { jwtOptions } from '../config/jwt'

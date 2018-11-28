@@ -1,6 +1,6 @@
 import { Request, Response } from 'express'
 import { ICompany, Company } from '../models/Company'
-import { Authorization } from '../models/Authorization'
+import { Authorization, AuthStatus } from '../models/Authorization'
 import { User, IUser } from '../models/User'
 
 export class AuthController {
@@ -46,7 +46,7 @@ export class AuthController {
       const found = await User.find({ email: userEmail }).exec()
 
       if (found.length !== 1) {
-        throw new Error('not found, found.length = ' + found.length)
+        throw new Error('user not found, found.length = ' + found.length)
       }
       user = found[0]
     } catch (e) {
@@ -59,7 +59,7 @@ export class AuthController {
     let newAuthorization = new Authorization({
       company: company._id,
       user: user._id,
-      status: 'PENDING'
+      status: AuthStatus.Pending
     })
 
     try {
@@ -75,5 +75,61 @@ export class AuthController {
     res.status(200).json({
       requestId: newAuthorization._id
     })
+  }
+
+  public async getAllActiveTokensForUser(req: Request, res: Response) {
+    const user: IUser = req.body.user
+
+    try {
+      const authorizations = await Authorization.find({
+        user: user._id,
+        status: AuthStatus.Ok
+      }).exec()
+
+      // populate simultaneously all authorizations' companies
+      await Promise.all(authorizations.map(async (auth) =>
+        await auth.populate('company').execPopulate()))
+
+      // keep only relevant fields
+      for (let i = 0; i < authorizations.length; i++) {
+        authorizations[i].company = {
+          name: authorizations[i].company.name,
+          image: authorizations[i].company.image
+        }
+      }
+
+      res.status(200).json(authorizations)
+    } catch (e) {
+      console.log(`couldn't fetch active tokens for user ${user} ===>> ${e}`)
+      res.status(500).send({ message: 'error fetching the active tokens' })
+    }
+  }
+
+  public async getAllPendingTokensForUser(req: Request, res: Response) {
+    const user: IUser = req.body.user
+
+    try {
+      const authorizations = await Authorization.find({
+        user: user._id,
+        status: AuthStatus.Pending
+      }).exec()
+
+      // populate simultaneously all authorizations' companies
+      await Promise.all(authorizations.map(async (auth) =>
+        await auth.populate('company').execPopulate()))
+
+      // keep only relevant fields
+      for (let i = 0; i < authorizations.length; i++) {
+        authorizations[i].company = {
+          name: authorizations[i].company.name,
+          image: authorizations[i].company.image
+        }
+      }
+
+      res.status(200).json(authorizations)
+    } catch (e) {
+      console.log(`couldn't fetch pending tokens for user ${user} ===>> ${e}`)
+      res.status(500).send({ message: 'error fetching the pending tokens' })
+    }
   }
 }
