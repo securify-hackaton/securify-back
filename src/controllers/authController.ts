@@ -73,8 +73,7 @@ export class AuthController {
       company: company._id,
       user: user._id,
       status: AuthStatus.Pending,
-      expirationDate,
-      scopes: company.scopes
+      expirationDate
     })
 
     try {
