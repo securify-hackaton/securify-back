@@ -7,6 +7,7 @@ const readFile = promisify(fs.readFile)
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
 import jsonwebtoken from 'jsonwebtoken'
+import axios from 'axios'
 
 import { Image } from '../models/Image'
 import { IUser } from '../models/User'
@@ -181,11 +182,24 @@ export class ImagesController {
             const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
 
             // POST callback
-            return res.status(200).send({
-                requestId: req.body.requestId,
-                validated: true,
-                token: `bearer ${token}`
-            })
+            res.status(200).send({ message: 'ok' })
+
+            try {
+                await authorization.populate('company').execPopulate()
+            } catch (e) {
+                console.log('could not populate auth company: ', e)
+                return
+            }
+
+            try {
+                await axios.post(authorization.company.callback, {
+                  requestId: authorization._id,
+                  validated: true,
+                  token: `bearer ${token}`
+                })
+            } catch (e) {
+            console.log('could not send callback to the company:', e)
+            }
         } catch (err) {
             console.log('verifyFace error:', err)
             return res.status(500).send({ message: 'error while trying to verify face integrity' })
