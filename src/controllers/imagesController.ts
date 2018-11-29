@@ -132,11 +132,16 @@ export class ImagesController {
                 if (imgModels[i].faceId && ttl < 23) {
                     faceId = imgModels[i].faceId
                 } else {
-                    const file = await readFile(imgModels[i].path)
-                    faceId = await this.getFaceId(file)
-                    imgModels[i].faceId = faceId
-                    imgModels[i].faceIdCreationDate = new Date()
-                    await imgModels[i].save()
+                    try {
+                        const file = await readFile(imgModels[i].path)
+                        faceId = await this.getFaceId(file)
+                        imgModels[i].faceId = faceId
+                        imgModels[i].faceIdCreationDate = new Date()
+                        await imgModels[i].save()
+                    } catch {
+                        user.images.filter(image => image.path !== imgModels[i].path)
+                        await user.save() // We remove the image from the db if we didn't find it in the /img folder
+                    }
                 }
 
                 const comparison = await this.compareFaces(toCheckFaceId, faceId)
