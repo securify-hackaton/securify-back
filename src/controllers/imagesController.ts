@@ -109,6 +109,10 @@ export class ImagesController {
 
         await user.populate('images').execPopulate()
 
+        if (user.images.length === 0) {
+            return res.status(400).send({ message: 'please add more images' })
+        }
+
         try {
             const toCheckFaceId = await this.getFaceId(req.files.image.data)
             const imgModels = user.images.slice(-3)
