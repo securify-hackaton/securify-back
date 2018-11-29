@@ -105,6 +105,10 @@ export class ImagesController {
             return
         }
 
+        if (authorization.status === AuthStatus.Ok) {
+            return res.status(200).send()
+        }
+
         const user = req.body.user
 
         await user.populate('images').execPopulate()
