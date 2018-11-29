@@ -27,8 +27,7 @@ export class ImagesController {
             return
         }
 
-        const user = req.body.user
-        if (!user) return
+        const { user } = req.body
 
         try {
             const fileName = './img/' + uuidv1()
@@ -42,16 +41,15 @@ export class ImagesController {
                 await image.save()
                 user.images.push(image.id)
                 await user.save()
-                res.status(200).send()
+                return res.status(200).send({ message: 'image saved' })
             })
         } catch {
-            res.status(400).send({ message: 'unable to upload file' })
+            return res.status(500).send({ message: 'unable to upload file' })
         }
     }
 
     // Delete any information saved on azure microsoft.
     public async removeImage(req: Request, res: Response) {
-
         if (req.body.faceId) {
             res.status(400).send({ message: 'image faceId is mandatory' })
             return
@@ -69,10 +67,12 @@ export class ImagesController {
             }
         }
 
-        if (index == -1) return res.status(404).send({ message: 'image not found' })
+        if (index === -1) {
+            return res.status(404).send({ message: 'image not found' })
+        }
 
         try {
-            fs.unlink(user.images[req.body.imageIndex].path, async (err) => {
+            fs.unlink(user.images[req.body.imageIndex].path, async (_err) => {
                 await user.images[req.body.imageIndex].remove()
                 user.images.splice(req.body.imageIndex, 1)
                 await user.save()
@@ -100,14 +100,19 @@ export class ImagesController {
             console.log(`verifyFace: did not find authorization ${req.body.requestId}`, e)
         }
 
-        if (authorization.user.toString() !== req.body.user._id.toString()) {
+        const { user } = req.body
+
+        if (authorization.user.toString() !== user._id.toString()) {
             res.status(401).send({ message: 'this is not yours!' })
             return
         }
 
-        const user = req.body.user
-
-        await user.populate('images').execPopulate()
+        try {
+            await user.populate('images').execPopulate()
+        } catch (e) {
+            console.log(`error populating user ${user._id} images: ${e}`)
+            return res.status(500).send({ message: 'error getting user images' })
+        }
 
         try {
             const toCheckFaceId = await this.getFaceId(req.files.image.data)
@@ -123,8 +128,17 @@ export class ImagesController {
             let confidence = 0
 
             for (let i = 0, length = imgModels.length; i < length; i++) {
+                // in hours
                 const ttl = (Math.abs(imgModels[i].faceIdCreationDate.valueOf() - new Date().valueOf()) / 1000 / 60 / 60)
                 let faceId
+
+                /*
+                 * Microsoft Azure Face API stores images up to 24 hours
+                 * we keep a local copy of all images and reupload them
+                 * when needed.
+                 * If the image is missing both from Azure and our local
+                 * storage, we delete it from the database
+                **/
                 if (imgModels[i].faceId && ttl < 23) {
                     faceId = imgModels[i].faceId
                 } else {
@@ -163,19 +177,18 @@ export class ImagesController {
                 res.status(500).send({ message: 'database error updating the authorization' })
             }
 
-            const payload = { tokenId: authorization    ._id }
+            const payload = { tokenId: authorization._id }
             const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
 
             // POST callback
-            res.status(200).send({
+            return res.status(200).send({
                 requestId: req.body.requestId,
                 validated: true,
                 token: `bearer ${token}`
             })
-
         } catch (err) {
-            console.log(err)
-            res.status(500).send({ message: 'error while trying to verify face integrity' })
+            console.log('verifyFace error:', err)
+            return res.status(500).send({ message: 'error while trying to verify face integrity' })
         }
     }
 
