@@ -113,7 +113,7 @@ export class ImagesController {
             return res.status(400).send({ message: 'authorization has an invalid status' })
         }
 
-        if (new Date(authorization.expirationDate) > new Date()) {
+        if (new Date(authorization.expirationDate) < new Date()) {
             return res.status(400).send({ message: 'authorization request expired' })
         }
 
