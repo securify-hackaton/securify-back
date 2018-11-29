@@ -6,7 +6,7 @@ const readFile = promisify(fs.readFile)
 
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
-import jsonwebtoken from 'jsonwebtoken'
+import * as jsonwebtoken from 'jsonwebtoken'
 
 import { Image } from '../models/Image'
 import { IUser } from '../models/User'
