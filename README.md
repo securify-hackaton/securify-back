@@ -71,6 +71,7 @@ http://localhost:3001/
 POST /users
 {
     email: string
+    password: string
     deviceId: string
     deviceType: string
     firstName: string [OPTIONAL]
@@ -92,13 +93,13 @@ Login with an email and a picture
 POST /login
 {
     email: string
-    image: string (base 64 encoded)
+    password: string
 }
 ```
 returns
 ```
 {
-    message: string
+    user: User
     token: string
 }
 ```

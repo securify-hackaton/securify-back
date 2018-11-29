@@ -6,7 +6,13 @@ import { jwtOptions } from '../config/jwt'
 
 export class UsersController {
   public addNewUser (req: Request, res: Response) {
+    if (!req.body.password) {
+      return res.status(400).send({  })
+    }
+
     const newUser = new User(req.body)
+
+    newUser.setPassword(req.body.password)
 
     newUser.save((err, user) => {
       if (err) {
@@ -72,7 +78,7 @@ export class UsersController {
     const payload = { userId: user._id }
     const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
     // TODO: save token hash in the database to prevent forgery
-    res.json({ message: 'ok', token: `bearer ${token}` })
+    res.json({ user, token: `bearer ${token}` })
   }
 
   public getUserByID (req: Request, res: Response) {
