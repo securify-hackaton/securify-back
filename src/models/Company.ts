@@ -14,6 +14,9 @@ export const CompanySchema = new Schema({
     type: String,
     required: 'callback URL required'
   },
+  scopes: {
+    type: String
+  },
   salt: {
     type: String
   },
@@ -59,6 +62,7 @@ export interface ICompany extends Document {
   name: string
   image: string
   callback: string
+  scopes: string
   hash: string
   salt: string
   createdDate: Date

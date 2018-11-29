@@ -105,7 +105,8 @@ export class AuthController {
       for (let i = 0; i < authorizations.length; i++) {
         authorizations[i].company = {
           name: authorizations[i].company.name,
-          image: authorizations[i].company.image
+          image: authorizations[i].company.image,
+          scopes: authorizations[i].company.scopes
         }
       }
 

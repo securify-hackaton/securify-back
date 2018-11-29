@@ -1,7 +1,6 @@
 import { Request, Response } from 'express'
 
-import { Company, ICompany } from '../models/Company'
-import { jwtOptions } from '../config/jwt'
+import { Company } from '../models/Company'
 
 export class CompanyController {
   public addNewCompany (req: Request, res: Response) {
