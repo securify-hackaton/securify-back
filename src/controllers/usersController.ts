@@ -12,6 +12,7 @@ export class UsersController {
 
     const newUser = new User(req.body)
 
+    newUser.email = newUser.email.trim().toLowerCase()
     newUser.setPassword(req.body.password)
 
     newUser.save((err, user) => {
@@ -50,6 +51,8 @@ export class UsersController {
       res.status(400).send({ message: 'email is mandatory' })
       return
     }
+
+    req.body.email = req.body.email.trim().toLowerCase()
 
     if (!req.body.password) {
       res.status(400).send({ message: 'password is mandatory' })
