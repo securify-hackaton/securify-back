@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { ICompany, Company } from '../models/Company'
 import { Authorization, AuthStatus, IAuthorization } from '../models/Authorization'
 import { User, IUser } from '../models/User'
+import NotificationServer  from '../service/NotificationService'
 
 export class AuthController {
   public async authorize (req: Request, res: Response) {
@@ -74,7 +75,8 @@ export class AuthController {
       return
     }
 
-    // TODO: send a push notification
+    const message = `${company.name} requires your approval`
+    NotificationServer.sendNotification(user.deviceId, message, {})
 
     res.status(200).json({
       requestId: newAuthorization._id
