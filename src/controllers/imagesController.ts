@@ -3,10 +3,15 @@ const fs = require('fs')
 const uuidv1 = require('uuid/v1')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
+
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
+import jsonwebtoken from 'jsonwebtoken'
+
 import { Image } from '../models/Image'
-import { IUser } from 'models/User'
+import { IUser } from '../models/User'
+import { IAuthorization, Authorization, AuthStatus } from '../models/Authorization'
+import { jwtOptions } from '../config/jwt'
 
 export class ImagesController {
     faceApi: any
@@ -18,7 +23,7 @@ export class ImagesController {
     // Add a image for the current user in azure cloud
     public async addImage(req: any, res: Response) {
         if (!req.files.image) {
-            res.status(400).send({message: 'Image is mandatory'})
+            res.status(400).send({ message: 'image is mandatory' })
             return
         }
 
@@ -40,7 +45,7 @@ export class ImagesController {
                 res.status(200).send()
             })
         } catch {
-            res.status(400).send({message: 'Unable to upload file'})
+            res.status(400).send({ message: 'unable to upload file' })
         }
     }
 
@@ -48,7 +53,7 @@ export class ImagesController {
     public async removeImage(req: Request, res: Response) {
 
         if (req.body.faceId) {
-            res.status(400).send({message: 'Image fadeId is mandatory'})
+            res.status(400).send({ message: 'image faceId is mandatory' })
             return
         }
 
@@ -64,28 +69,44 @@ export class ImagesController {
             }
         }
 
-        if (index == -1) return res.status(404).send({message: 'Image not found'})
+        if (index == -1) return res.status(404).send({ message: 'image not found' })
 
         try {
             fs.unlink(user.images[req.body.imageIndex].path, async (err) => {
                 await user.images[req.body.imageIndex].remove()
                 user.images.splice(req.body.imageIndex, 1)
                 await user.save()
-                res.status(200).send({message: 'Successfully deleted images'})
+                res.status(200).send({ message: 'successfully deleted images' })
             })
         } catch {
-            res.status(500).send({message: 'Unable to delete images'})
+            res.status(500).send({ message: 'unable to delete images' })
         }
     }
 
     public async verifyFace(req: any, res: Response) {
+        if (!req.body.requestId) {
+            res.status(400).send({ message: 'requestId is mandatory' })
+            return
+        }
         if (!req.files.image) {
-            res.status(400).send({message: 'Image is mandatory'})
+            res.status(400).send({ message: 'image is mandatory' })
+            return
+        }
+
+        let authorization: IAuthorization
+        try {
+            authorization = await Authorization.findById(req.body.requestId).exec()
+        } catch (e) {
+            console.log(`verifyFace: did not find authorization ${req.body.requestId}`, e)
+        }
+
+        if (authorization.user.toString() !== req.body.user._id.toString()) {
+            res.status(401).send({ message: 'this is not yours!' })
             return
         }
 
         const user = req.body.user
-        if (!user) return
+
         await user.populate('images').execPopulate()
 
         try {
@@ -124,17 +145,38 @@ export class ImagesController {
             console.log('number identical : ' + numberIdentical)
             console.log('confidence : ' + confidence / imgModels.length)
 
-            if (numberIdentical >= Math.ceil(imgModels.length / 2) ||  (confidence / imgModels.length) > 0.5 ) {
-                res.status(200).send()
-            } else {
-                res.status(400).send({message: 'Not the same person'})
+            if (!(numberIdentical >= Math.ceil(imgModels.length / 2) ||  (confidence / imgModels.length) > 0.5)) {
+                res.status(400).send({ message: 'not the same person' })
+                return
             }
+
+            const expirationDate = new Date()
+            expirationDate.setDate(expirationDate.getDate() + 7)
+
+            authorization.status = AuthStatus.Ok
+            authorization.expirationDate
+
+            try {
+                await authorization.save()
+            } catch (e) {
+                console.log(`could not save authorization ${authorization._id}:`, e)
+                res.status(500).send({ message: 'database error updating the authorization' })
+            }
+
+            const payload = { tokenId: authorization    ._id }
+            const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
+
+            // POST callback
+            res.status(200).send({
+                requestId: req.body.requestId,
+                validated: true,
+                token: `bearer ${token}`
+            })
 
         } catch (err) {
             console.log(err)
-            res.status(500).send({message: 'Error while trying to verify face integrity'})
+            res.status(500).send({ message: 'error while trying to verify face integrity' })
         }
-
     }
 
     private async compareFaces(firstFaceId: string, secondFaceId: string): Promise<{isIdentical: boolean, confidence: number}> {

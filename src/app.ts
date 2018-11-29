@@ -134,6 +134,16 @@ class App {
               return
             }
 
+            if (auth.status === AuthStatus.Denied) {
+              res.status(401).send({ message: 'token denied by user' })
+              return
+            }
+
+            if (auth.status !== AuthStatus.Ok) {
+              res.status(401).send({ message: 'token not confirmed by user' })
+              return
+            }
+
             if (new Date(auth.expirationDate) < new Date()) {
               res.status(401).send({ message: 'token expired' })
               return
@@ -153,9 +163,6 @@ class App {
 
         // everything went well and the JWT is valid
         next()
-
-        // log after the next() for more organized logs
-        console.log('Authenticated user id:', userId)
         return
       } catch (e) {
         console.log('error decoding the JWT:', e)
