@@ -26,9 +26,11 @@
             </template>
             <br>
             <input class="button" v-if="!publicKey" type="submit" value="Register" @click="register" />
-            <div v-else>
-                Public key: {{ publicKey }}<br>
-                Private key: {{ privateKey }}
+            <div class="result" v-else>
+                <strong>Public key:</strong><br>
+                {{ publicKey }}<br>
+                <strong>Private key:</strong><br>
+                {{ privateKey }}
             </div>
         </div>
     </div>
