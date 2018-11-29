@@ -6,8 +6,8 @@ const readFile = promisify(fs.readFile)
 
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
-import jsonwebtoken from 'jsonwebtoken'
 import axios from 'axios'
+import * as jsonwebtoken from 'jsonwebtoken'
 
 import { Image } from '../models/Image'
 import { IUser } from '../models/User'
@@ -115,6 +115,22 @@ export class ImagesController {
             return res.status(500).send({ message: 'error getting user images' })
         }
 
+        if (authorization.status === AuthStatus.Ok) {
+            return res.status(200).send({ message: 'authorization is already validated' })
+        }
+
+        if (authorization.status !== AuthStatus.Pending) {
+            return res.status(400).send({ message: 'authorization has an invalid status' })
+        }
+
+        if (new Date(authorization.expirationDate) < new Date()) {
+            return res.status(400).send({ message: 'authorization request expired' })
+        }
+
+        if (user.images.length === 0) {
+            return res.status(400).send({ message: 'please add more images' })
+        }
+
         try {
             const toCheckFaceId = await this.getFaceId(req.files.image.data)
             const imgModels = user.images.slice(-3)
@@ -143,11 +159,16 @@ export class ImagesController {
                 if (imgModels[i].faceId && ttl < 23) {
                     faceId = imgModels[i].faceId
                 } else {
-                    const file = await readFile(imgModels[i].path)
-                    faceId = await this.getFaceId(file)
-                    imgModels[i].faceId = faceId
-                    imgModels[i].faceIdCreationDate = new Date()
-                    await imgModels[i].save()
+                    try {
+                        const file = await readFile(imgModels[i].path)
+                        faceId = await this.getFaceId(file)
+                        imgModels[i].faceId = faceId
+                        imgModels[i].faceIdCreationDate = new Date()
+                        await imgModels[i].save()
+                    } catch {
+                        user.images.filter(image => image.path !== imgModels[i].path)
+                        await user.save() // We remove the image from the db if we didn't find it in the /img folder
+                    }
                 }
 
                 const comparison = await this.compareFaces(toCheckFaceId, faceId)
