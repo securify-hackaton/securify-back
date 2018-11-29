@@ -192,6 +192,7 @@ returns
         company: {
             name: string
             image: string
+            scopes: string (joined with ';')
         }
     }
 ]
@@ -212,6 +213,7 @@ returns
         company: {
             name: string
             image: string
+            scopes: string (joined with ';')
         }
     }
 ]

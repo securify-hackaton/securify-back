@@ -61,7 +61,7 @@ var app = new Vue({
       console.log(this.name, this.logo)
 
       try {
-        const scope = this.scopes
+        const scopes = this.scopes
           .filter(s => s.active)
           .map(s => s.name)
           .join(';')
@@ -69,7 +69,7 @@ var app = new Vue({
           name: this.name,
           image: this.logo,
           callback: this.callback,
-          scope
+          scopes
         })
 
         this.privateKey = result.data.privateKey
