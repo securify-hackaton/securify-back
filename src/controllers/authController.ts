@@ -1,4 +1,6 @@
 import { Request, Response } from 'express'
+import axios from 'axios'
+
 import { ICompany, Company } from '../models/Company'
 import { Authorization, AuthStatus, IAuthorization } from '../models/Authorization'
 import { User, IUser } from '../models/User'
@@ -169,17 +171,30 @@ export class AuthController {
       return
     }
 
-    auth.status = AuthStatus.Revoked
+    if (auth.status === AuthStatus.Pending) {
+      auth.status = AuthStatus.Denied
+    } else {
+      auth.status = AuthStatus.Revoked
+    }
 
     try {
       await auth.save()
       res.status(200).send({ message: 'revoked' })
-      return
     } catch (e) {
       console.log('error saving the auth:', e)
       const message = 'could not revoke the token: database error'
       res.status(500).send({ message })
       return
+    }
+
+    try {
+      await axios.post(auth.company.callback, {
+        requestId: tokenId,
+        validated: false,
+        reason: 'denied by user'
+      })
+    } catch (e) {
+      console.log('could not send callback to the company:', e)
     }
   }
 }
