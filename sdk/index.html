@@ -19,6 +19,10 @@
             <input class="input" type="text" v-model="name" placeholder="Name" /><br>
             <input class="input" type="text" v-model="logo" placeholder="Logo" /><br>
             <input class="input" type="text" v-model="callback" placeholder="POST Callback URL" /><br>
+            <strong>Scopes:</strong>
+            <div v-for="scope in scopes" :key="scope.name">
+                <input v-model="scope.active" type="checkbox" /> {{ scope.display }}
+            </div>
             <template v-if="error">
                 <br>
                 <p class="error" v-html="error" />

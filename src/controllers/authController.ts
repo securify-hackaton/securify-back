@@ -192,6 +192,13 @@ export class AuthController {
     }
 
     try {
+      await auth.populate('company').execPopulate()
+    } catch (e) {
+      console.log('could not populate auth company:', e)
+      return
+    }
+
+    try {
       await axios.post(auth.company.callback, {
         requestId: tokenId,
         validated: false,

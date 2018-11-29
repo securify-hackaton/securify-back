@@ -5,6 +5,22 @@ var app = new Vue({
     name: '',
     logo: '',
     callback: '',
+    scopes: [
+      {
+        name: 'email',
+        display: 'Email address',
+        active: true,
+        forced: true
+      }, {
+        name: 'fullname',
+        display: 'Full name',
+        active: false
+      }, {
+        name: 'age',
+        display: 'User age',
+        active: false
+      }
+    ],
     privateKey: null,
     publicKey: null,
     error: null,
@@ -45,10 +61,15 @@ var app = new Vue({
       console.log(this.name, this.logo)
 
       try {
+        const scope = this.scopes
+          .filter(s => s.active)
+          .map(s => s.name)
+          .join(';')
         const result = await axios.post(companyURL, {
           name: this.name,
           image: this.logo,
-          callback: this.callback
+          callback: this.callback,
+          scope
         })
 
         this.privateKey = result.data.privateKey
