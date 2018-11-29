@@ -17,7 +17,12 @@
     "ts-node": "^7.0.1",
     "axios": "^0.18.0",
     "uuid": "^3.3.2",
-    "typescript": "^3.1.6"
+    "typescript": "^3.1.6",
+    "@types/cors": "^2.8.4",
+    "@types/express": "^4.16.0",
+    "@types/mongodb": "^3.1.14",
+    "@types/mongoose": "^5.3.1",
+    "@types/socket.io": "^2.1.0"
   },
   "scripts": {
     "build": "tsc && npm run tslint",
@@ -28,11 +33,6 @@
     "tslint": "tslint -c tslint.json -p tsconfig.json"
   },
   "devDependencies": {
-    "@types/cors": "^2.8.4",
-    "@types/express": "^4.16.0",
-    "@types/mongodb": "^3.1.14",
-    "@types/mongoose": "^5.3.1",
-    "@types/socket.io": "^2.1.0",
     "jest": "^23.6.0",
     "nodemon": "^1.18.7",
     "tslint": "^5.11.0"
