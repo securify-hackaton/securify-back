@@ -10,6 +10,7 @@ export class AuthController {
   public async authorize (req: Request, res: Response) {
     const { privateKey, publicKey } = req.body
     const userEmail = req.body.userEmail.trim().toLowerCase()
+    const deviceName = req.body.deviceName.trim()
 
     if (!privateKey) {
       res.status(400).send({ message: 'privateKey is mandatory' })
@@ -21,6 +22,10 @@ export class AuthController {
     }
     if (!userEmail) {
       res.status(400).send({ message: 'userEmail is mandatory' })
+      return
+    }
+    if (!deviceName) {
+      res.status(400).send({ message: 'deviceName is mandatory' })
       return
     }
 

@@ -24,6 +24,9 @@ export const AuthorizationSchema = new Schema({
     type: String,
     required: 'status must be one of PENDING, DENIED, OK, REVOKED'
   },
+  deviceName: {
+    type: String
+  },
   createdDate: {
     type: Date,
     default: Date.now
@@ -41,6 +44,7 @@ export interface IAuthorization extends Document {
   company: ICompany | Types.ObjectId | any
   user: IUser | Types.ObjectId
   status: string
+  deviceName: string
   createdDate: Date
   expirationDate: Date
 }
