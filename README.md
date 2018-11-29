@@ -16,9 +16,11 @@ npm i
 # Linux / MacOS
 export MONGODB_URI=mongodb://poiuytreza:XbNZvpF7MVwZL45@ds151004.mlab.com:51004/gilet-jaune
 export JWT_KEY=est-ceQueCeMot2PasseEst(très)DifficileàTrouver?Oui_ça_va!
+export AZURE_KEY=648eb5213a444a3c8e55e491447ed052
 # Windows
 set MONGODB_URI=mongodb://poiuytreza:XbNZvpF7MVwZL45@ds151004.mlab.com:51004/gilet-jaune
 set JWT_KEY=est-ceQueCeMot2PasseEst(très)DifficileàTrouver?Oui_ça_va!
+set AZURE_KEY=648eb5213a444a3c8e55e491447ed052
 
 # Run the server
 npm run start
