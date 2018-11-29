@@ -71,7 +71,7 @@ export class AuthController {
       return
     }
 
-    const message = `Demande d'authorisation de connexion sur ${company.name}`
+    const message = `${company.name} requires your approval`
     NotificationServer.sendNotification(user.deviceId, message, {})
 
     res.status(200).json({
