@@ -8,7 +8,9 @@ import NotificationServer  from '../service/NotificationService'
 
 export class AuthController {
   public async authorize (req: Request, res: Response) {
-    const { userEmail, privateKey, publicKey } = req.body
+    const { privateKey, publicKey } = req.body
+    const userEmail = req.body.userEmail.trim().toLowerCase()
+
     if (!privateKey) {
       res.status(400).send({ message: 'privateKey is mandatory' })
       return
