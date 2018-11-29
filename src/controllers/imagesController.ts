@@ -106,7 +106,15 @@ export class ImagesController {
         }
 
         if (authorization.status === AuthStatus.Ok) {
-            return res.status(200).send()
+            return res.status(200).send({ message: 'authorization is already validated' })
+        }
+
+        if (authorization.status !== AuthStatus.Pending) {
+            return res.status(400).send({ message: 'authorization has an invalid status' })
+        }
+
+        if (new Date(authorization.expirationDate) > new Date()) {
+            return res.status(400).send({ message: 'authorization request expired' })
         }
 
         const user = req.body.user
