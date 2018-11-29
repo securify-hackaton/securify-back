@@ -30,7 +30,7 @@ export const AuthorizationSchema = new Schema({
   },
   expirationDate: {
     type: Date,
-    default: Date.now
+    required: 'expiration date is required'
   }
 })
 

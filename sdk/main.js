@@ -1,4 +1,4 @@
-var companyURL = 'http://localhost:3000/company'
+var companyURL = '/company'
 var app = new Vue({
   el: '#app',
   data: () => ({
