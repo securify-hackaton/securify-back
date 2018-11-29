@@ -3,6 +3,21 @@
 
 # Getting started
 
+## Choice 1: use our demo
+
+1/
+Install Securify on your mobile phone:
+- Android: search "Securify" on the Google Play Store search
+- iOS: not available yet, because it costs 90€/year to list an app
+Create an account (with an email you will remember)
+
+2/
+Netflic example: https://securify-netflic.herokuapp.com  
+Spautify example: https://securify-spautify.herokuapp.com  
+Epsy example: https://securify-epsy.herokuapp.com  
+
+## Choice 2: setup your own servers
+
 Install [Node.js LTS](https://nodejs.org/en/download/) 
 
 **Back end**
