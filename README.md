@@ -51,6 +51,8 @@ http://localhost:3000/sdk
 
 **Mobile app**
 
+- Follow the README at https://gitlab.com/voauth/securify-front to run the server
+- Install Expo on your mobile phone (iOS or Android) and scan the QR code
 - Register with a valid email
 - Upload 3 pictures
 

@@ -11,25 +11,25 @@
 
 </head>
 <body>
+    <div id="dancing-man"></div>
     <div id="app">
-        <h1>Register your dev account</h1>
+        <h1>New deveveloper account</h1>
         <br>
-        <label>Name</label><br>
-        <input type="text" v-model="name" /><br>
-        <label>Logo</label><br>
-        <input type="text" v-model="logo" placeholder="https://abcd.efgh/ijkl.jpg" /><br>
-        <label>POST Callback URL</label><br>
-        <input type="text" v-model="callback" placeholder="https://abcd.efgh/callback" /><br>
-        <template v-if="error">
+        <div class="form">
+            <input class="input" type="text" v-model="name" placeholder="Name" /><br>
+            <input class="input" type="text" v-model="logo" placeholder="Logo" /><br>
+            <input class="input" type="text" v-model="callback" placeholder="POST Callback URL" /><br>
+            <template v-if="error">
+                <br>
+                <p class="error" v-html="error" />
+                <br>
+            </template>
             <br>
-            <p class="error" v-html="error" />
-            <br>
-        </template>
-        <br>
-        <input v-if="!publicKey" type="submit" value="Register" @click="register" />
-        <div v-else>
-            Public key: {{ publicKey }}<br>
-            Private key: {{ privateKey }}
+            <input class="button" v-if="!publicKey" type="submit" value="Register" @click="register" />
+            <div v-else>
+                Public key: {{ publicKey }}<br>
+                Private key: {{ privateKey }}
+            </div>
         </div>
     </div>
 
