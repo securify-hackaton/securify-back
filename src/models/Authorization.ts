@@ -34,6 +34,9 @@ export const AuthorizationSchema = new Schema({
   expirationDate: {
     type: Date,
     required: 'expiration date is required'
+  },
+  scopes: {
+    type: String
   }
 })
 
@@ -47,6 +50,7 @@ export interface IAuthorization extends Document {
   deviceName: string
   createdDate: Date
   expirationDate: Date
+  scopes: string
 }
 
 export const Authorization: Model<IAuthorization> = model<IAuthorization>('Authorization', AuthorizationSchema, 'authorization')
