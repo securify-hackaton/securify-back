@@ -27,6 +27,9 @@ export const AuthorizationSchema = new Schema({
   deviceName: {
     type: String
   },
+  scopes: {
+    type: String
+  },
   createdDate: {
     type: Date,
     default: Date.now
@@ -45,6 +48,7 @@ export interface IAuthorization extends Document {
   user: IUser | Types.ObjectId
   status: string
   deviceName: string
+  scopes: string
   createdDate: Date
   expirationDate: Date
 }
