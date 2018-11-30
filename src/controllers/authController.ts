@@ -8,7 +8,7 @@ import NotificationServer  from '../service/NotificationService'
 
 export class AuthController {
   public async authorize (req: Request, res: Response) {
-    const { privateKey, publicKey, scopes } = req.body
+    const { privateKey, publicKey } = req.body
     const userEmail = req.body.userEmail.trim().toLowerCase()
     const deviceName = req.body.deviceName.trim()
 
@@ -26,10 +26,6 @@ export class AuthController {
     }
     if (!deviceName) {
       res.status(400).send({ message: 'deviceName is mandatory' })
-      return
-    }
-    if (!scopes) {
-      res.status(400).send({ message: 'scopes is mandatory' })
       return
     }
 
@@ -77,7 +73,7 @@ export class AuthController {
       company: company._id,
       user: user._id,
       status: AuthStatus.Pending,
-      scopes,
+      scopes: company.scopes,
       deviceName,
       expirationDate
     })
