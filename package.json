@@ -1,5 +1,11 @@
 {
   "dependencies": {
+    "@types/cors": "^2.8.4",
+    "@types/express": "^4.16.0",
+    "@types/mongodb": "^3.1.14",
+    "@types/mongoose": "^5.3.1",
+    "@types/socket.io": "^2.1.0",
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "cognitive-services": "^1.2.1",
     "cors": "^2.8.5",
@@ -10,19 +16,14 @@
     "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.3.9",
     "morgan": "^1.9.1",
+    "nodemailer": "^4.7.0",
     "promise-retry": "^1.1.1",
     "sleep-promise": "^8.0.1",
     "socket.io": "^2.1.1",
     "timeout-as-promise": "^1.0.0",
     "ts-node": "^7.0.1",
-    "axios": "^0.18.0",
-    "uuid": "^3.3.2",
     "typescript": "^3.1.6",
-    "@types/cors": "^2.8.4",
-    "@types/express": "^4.16.0",
-    "@types/mongodb": "^3.1.14",
-    "@types/mongoose": "^5.3.1",
-    "@types/socket.io": "^2.1.0"
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "build": "tsc && npm run tslint",

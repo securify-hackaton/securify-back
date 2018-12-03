@@ -32,6 +32,9 @@ export const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+  emailValidationKey: {
+    type: String,
+  },
   salt: {
     type: String
   },
@@ -81,6 +84,7 @@ export interface IUser extends Document {
   deviceId: string
   deviceType: string
   emailValidated: boolean
+  emailValidationKey: string
   hash: string
   salt: string
   created_date: Date
