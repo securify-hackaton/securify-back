@@ -5,7 +5,6 @@ import { randomBytes } from 'crypto'
 
 import { User, IUser } from '../models/User'
 import { jwtOptions } from '../config/jwt'
-import { resolveSoa } from 'dns';
 
 export class UsersController {
   public addNewUser (req: Request, res: Response): Response {
@@ -27,7 +26,6 @@ export class UsersController {
         return res.status(500).send(err)
       }
 
-      // todo: save token in database and get inserted _id
       const payload = { userId: user._id }
       const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
 
