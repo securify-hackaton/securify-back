@@ -21,9 +21,7 @@ class App {
   public app: express.Application
 
   constructor() {
-    if (!this.mongoUrl) {
-      throw new Error('MONGODB_URI is mandatory')
-    }
+    this.checkMandatoryEnv()
     this.app = express()
     this.config()
     this.authSetup()
@@ -32,6 +30,20 @@ class App {
     this.mongoSetup()
     this.serverSetup()
     this.listen()
+  }
+
+  private checkMandatoryEnv(): void {
+    [
+      'MONGODB_URI',
+      'JWT_KEY',
+      'GMAIL_USERNAME',
+      'GMAIL_PASSWORD',
+      'DEPLOY_URL'
+    ].forEach(v => {
+      if (!process.env[v]) {
+        throw new Error(`${v} is mandatory`)
+      }
+    })
   }
 
   private config(): void {
@@ -50,43 +62,36 @@ class App {
 
   private authSetup(): void {
     // Requires a valid JSON Web Token for any route except login and register
-    this.app.use(async (req: Request, res: Response, next: NextFunction) => {
+    this.app.use(async (req: Request, res: Response, next: NextFunction): Promise<Response | void> => {
       const { authorization } = req.headers
 
       if (!authorization) {
         // register, login => ok
         if (req.method === 'POST' && (req.originalUrl === '/users' || req.originalUrl === '/login')) {
-          next()
-          return
+          return next()
         }
         // create a developper account => ok
         if (req.method === 'POST' && req.originalUrl === '/company') {
-          next()
-          return
+          return next()
         }
         // authorization demand => ok
         if (req.method === 'POST' && req.originalUrl === '/authorize') {
-          next()
-          return
+          return next()
         }
         // sdk website => ok
         if (req.method === 'GET' && /\/sdk(.*)/.test(req.originalUrl)) {
-          next()
-          return
+          return next()
         }
         // email confirmation => ok
         if (req.method === 'GET' && /\/confirm\?(.*)/.test(req.originalUrl)) {
-          next()
-          return
+          return next()
         }
-        res.status(401).send('the Authorization header is mandatory')
-        return
+        return res.status(401).send('the Authorization header is mandatory')
       }
 
       const tokenParts = authorization.split(' ')
       if (tokenParts.length !== 2) {
-        res.status(401).send('the Authorization header should be formed of token type, followed by the token value: "bearer [my_token]"')
-        return
+        return res.status(401).send('the Authorization header should be formed of token type, followed by the token value: "bearer [my_token]"')
       }
 
       const token = {
@@ -102,26 +107,25 @@ class App {
         } = jsonwebtoken.verify(token.value, jwtOptions.secretOrKey)
 
         if (!userId && !tokenId) {
-          res.status(401).send({ message: 'invalid token' })
-          return
+          return res.status(401).send({ message: 'invalid token' })
         }
 
         if (userId) {
           try {
-            // TODO (when email validation is done): check in the database that
-            // the user email is confirmed
             const usr = await User.findById(userId).exec()
 
             if (!usr) {
-              res.status(401).send({ message: 'user not found' })
-              return
+              return res.status(401).send({ message: 'user not found' })
+            }
+
+            if (!usr.emailValidated) {
+              return res.status(401).send({ message: 'email must be confirmed' })
             }
 
             // make the verified user available when handling the request
             req.body.user = usr
           } catch (e) {
-            res.status(501).send({ message: 'database error: ' + e })
-            return
+            return res.status(501).send({ message: 'database error: ' + e })
           }
         }
 
@@ -130,28 +134,23 @@ class App {
             const auth = await Authorization.findById(tokenId)
 
             if (!auth) {
-              res.status(401).send({ message: 'token not found' })
-              return
+              return res.status(401).send({ message: 'token not found' })
             }
 
             if (auth.status === AuthStatus.Revoked) {
-              res.status(401).send({ message: 'token revoked' })
-              return
+              return res.status(401).send({ message: 'token revoked' })
             }
 
             if (auth.status === AuthStatus.Denied) {
-              res.status(401).send({ message: 'token denied by user' })
-              return
+              return res.status(401).send({ message: 'token denied by user' })
             }
 
             if (auth.status !== AuthStatus.Ok) {
-              res.status(401).send({ message: 'token not confirmed by user' })
-              return
+              return res.status(401).send({ message: 'token not confirmed by user' })
             }
 
             if (new Date(auth.expirationDate) < new Date()) {
-              res.status(401).send({ message: 'token expired' })
-              return
+              return res.status(401).send({ message: 'token expired' })
             }
 
             await auth.populate('company').execPopulate()
@@ -162,17 +161,15 @@ class App {
             req.body.company = auth.company
             req.body.token = auth
           } catch (e) {
-            res.status(501).send({ message: 'database error: ' + e })
+            return res.status(501).send({ message: 'database error: ' + e })
           }
         }
 
         // everything went well and the JWT is valid
-        next()
-        return
+        return next()
       } catch (e) {
         console.log('error decoding the JWT:', e)
-        res.status(401).send({ message: 'error decoding the token' })
-        return
+        return res.status(401).send({ message: 'error decoding the token' })
       }
     })
   }
