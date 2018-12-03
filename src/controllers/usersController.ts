@@ -2,11 +2,10 @@ import { Request, Response } from 'express'
 import jsonwebtoken = require('jsonwebtoken')
 import nodemailer = require('nodemailer')
 import { randomBytes } from 'crypto'
-import * as Bluebird from 'bluebird'
 
 import { User, IUser } from '../models/User'
 import { jwtOptions } from '../config/jwt'
-import { json } from 'body-parser';
+import { resolveSoa } from 'dns';
 
 export class UsersController {
   public addNewUser (req: Request, res: Response): Response {
@@ -45,9 +44,51 @@ export class UsersController {
     })
   }
 
+  public async confirmEmail(req: Request, res: Response): Promise<Response> {
+    console.log(req)
+    const { email, key } = req.query
+
+    if (!email) {
+      return res.status(400).send({ message: 'email is required' })
+    }
+    if (!key) {
+      return res.status(400).send({ message: 'key is required' })
+    }
+
+    let users: IUser[]
+    try {
+      users = await User.find({ email }).exec()
+    } catch (e) {
+      console.log(`confirmEmail: fetching user failed: ${e}`)
+      return res.status(500).send({ message: 'server error' })
+    }
+
+    if (users.length !== 1) {
+      console.log(`found ${users.length} users instead of 1`)
+      return res.status(400).send({ message: 'email not found' })
+    }
+
+    const user = users[0]
+
+    if (key !== user.emailValidationKey) {
+      return res.status(400).send({ message: 'invalid key' })
+    }
+
+    user.emailValidated = true
+
+    try {
+      await user.save()
+    } catch (e) {
+      console.log(`couldn't validate user email: ${e}`)
+      return res.status(500).send({ message: 'server error' })
+    }
+
+    return res.status(200).send({ message: 'email validated' })
+  }
+
   public async getUsers (_: Request, res: Response): Promise<Response> {
     try {
-      const users = await User.find({})
+      const users = await User.find({}).exec()
       return res.json(users)
     } catch (e) {
       console.log(`error fetching all users: ${e}`)
@@ -168,7 +209,15 @@ export class UsersController {
       html: `<p>Hello ${user.firstName}, welcome to Securify.<br><br>Please confirm your email: ${securify}/confirm?email=${user.email}&key=${key}.</p>`
     }
 
-    const sendMail = Bluebird.promisify(transporter.sendMail)
+    const sendMail = (mailOptions) => new Promise<any>((resolve, reject) => {
+      transporter.sendMail(mailOptions, (err, data) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(data)
+        }
+      })
+    })
 
     let info
     try {
@@ -178,6 +227,6 @@ export class UsersController {
       throw e
     }
 
-    console.log(`mail ok: ${info}`)
+    console.log(`mail ok: ${JSON.stringify(info)}`)
   }
 }

@@ -40,7 +40,10 @@ export class Routes {
         console.log(`Request type: ${req.method}`)
           next()
       }, this.usersController.getUsers)
-      .post(this.usersController.addNewUser)
+      .post(this.usersController.addNewUser.bind(this.usersController))
+
+    app.route('/confirm')
+      .get(this.usersController.confirmEmail)
 
     app.route('/users/:userId')
       .get(this.usersController.getUserByID)
