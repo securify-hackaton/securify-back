@@ -175,13 +175,6 @@ export class UsersController {
     const password = process.env.GMAIL_PASSWORD
     const securify = process.env.DEPLOY_URL
 
-    if (!username) {
-      throw new Error('GMAIL_USERNAME is mandatory')
-    }
-    if (!password) {
-      throw new Error('GMAIL_PASSWORD is mandatory')
-    }
-
     const key = randomBytes(16).toString('hex')
 
     user.emailValidationKey = key
