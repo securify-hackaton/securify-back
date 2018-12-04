@@ -48,9 +48,6 @@ export class UsersController {
     if (!email) {
       return res.status(400).send({ message: 'email is required' })
     }
-    if (!key) {
-      return res.status(400).send({ message: 'key is required' })
-    }
 
     let users: IUser[]
     try {
@@ -67,7 +64,15 @@ export class UsersController {
 
     const user = users[0]
 
-    if (key !== user.emailValidationKey) {
+    if (user.emailValidated) {
+      return res.status(400).send({ message: 'email already confirmed' })
+    }
+
+    if (!key) {
+      return res.status(400).send({ message: 'key is required' })
+    }
+
+    if (!user.validEmailConfirmation(key)) {
       return res.status(400).send({ message: 'invalid key' })
     }
 
@@ -175,7 +180,7 @@ export class UsersController {
 
     const key = randomBytes(16).toString('hex')
 
-    user.emailValidationKey = key
+    user.setEmailConfirmationKey(key)
 
     try {
       await user.save()
