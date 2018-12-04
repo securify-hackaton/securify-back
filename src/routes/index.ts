@@ -14,17 +14,16 @@ export class Routes {
   public imageController: ImagesController = new ImagesController()
 
   public routes(app): void {
+    // allow preflight requests: some browsers, axios and some other libs send
+    // an OPTION request before the actual request
     app.options('*', cors())
+
     app.route('/')
       .get((req: Request, res: Response) => {
         res.status(200).send({
-          message: 'Gilet Jaune API v0.0.1',
-          user: {
-            // mongoose document info is stored under _doc
-            ...req.body.user._doc,
-            // we do not want to include user images in the response
-            images: undefined
-          }
+          message: 'Securify API v1.0.0',
+          user: req.body.user,
+          company: req.body.company
         })
       })
 
