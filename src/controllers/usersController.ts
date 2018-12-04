@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto'
 
 import { User, IUser } from '../models/User'
 import { jwtOptions } from '../config/jwt'
+import { userInfo } from 'os';
 
 export class UsersController {
   public addNewUser (req: Request, res: Response): Response {
@@ -171,6 +172,22 @@ export class UsersController {
       }
       res.json({ message: 'Successfully deleted user!'})
     })
+  }
+
+  public async newConfirmationEmail(req: Request, res: Response): Promise<Response> {
+    const user: IUser = req.body.user
+
+    if (user.emailValidated) {
+      return res.status(400).send({ message: 'already validated' })
+    }
+
+    try {
+      await this.sendVerificationMail(user)
+      return res.status(200).send({ message: 'sent' })
+    } catch (e) {
+      console.log(`couldn't send confirmation email: ${e}`)
+      return res.status(500).send({ message: `couldn't send the confirmation` })
+    }
   }
 
   private async sendVerificationMail(user: IUser): Promise<void> {

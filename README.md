@@ -162,10 +162,25 @@ returns
 ## Authenticated routes
 
 All other routes require a token in the `Authorization` header.
+Email needs to be confirmed to activate the token
+
+**Confirm email**
+
+Send a new confirmation email
+```
+POST /confirm
+{ }
+```
+returns
+```
+{ 
+    message: string
+}
+```
 
 **ME**
 
-Get the logged user
+Get the logged user info
 ```
 GET /
 ```

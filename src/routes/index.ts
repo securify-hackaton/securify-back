@@ -44,6 +44,7 @@ export class Routes {
 
     app.route('/confirm')
       .get(this.usersController.confirmEmail)
+      .post(this.usersController.newConfirmationEmail)
 
     app.route('/users/:userId')
       .get(this.usersController.getUserByID)

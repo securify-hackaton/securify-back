@@ -118,7 +118,9 @@ class App {
               return res.status(401).send({ message: 'user not found' })
             }
 
-            if (!usr.emailValidated) {
+            // for all authenticated routes except 'new confirmation email',
+            // email must be validated
+            if (!usr.emailValidated && (req.method !== 'POST' || req.originalUrl === '/confirm')) {
               return res.status(401).send({ message: 'email must be confirmed' })
             }
 
