@@ -3,6 +3,7 @@ const fs = require('fs')
 const uuidv1 = require('uuid/v1')
 const { promisify } = require('util')
 const readFile = promisify(fs.readFile)
+const { S3 } = require('aws-sdk')
 
 import AzureOptions from '../config/azure'
 import { Request, Response } from 'express'
@@ -16,9 +17,38 @@ import { jwtOptions } from '../config/jwt'
 
 export class ImagesController {
     faceApi: any
+    s3: any
 
     constructor() {
         this.faceApi = new CognitiveServices.face(AzureOptions)
+        this.s3 = new S3()
+        if (!process.env.AWS_S3_IMG_BUCKET) {
+            throw new Error(`AWS_S3_IMG_BUCKET is mandatory!`)
+        }
+    }
+
+    private async storeImage(img, key) {
+        const bucket = process.env.AWS_S3_IMG_BUCKET
+        // can throw
+        const _response1 = await this.s3.createBucket({
+            Bucket: bucket
+        }).promise()
+
+        console.log(`creating bucket ok: ${_response1}`)
+
+        const payload = {
+            Bucket: bucket,
+            Key: key,
+            Body: img
+        }
+
+        const _response2 = await this.s3.putObject(payload).promise()
+
+        console.log(`added image to ${bucket}/${key}: ${_response2}`)
+    }
+
+    public getImage(key) {
+        // this.s3.getObject()
     }
 
     // Add a image for the current user in azure cloud
@@ -31,7 +61,15 @@ export class ImagesController {
         const { user } = req.body
 
         try {
-            const fileName = './img/' + uuidv1()
+            const id = uuidv1()
+            const fileName = './img/' + id
+
+            try {
+                this.storeImage(req.files.image.data, id)
+            } catch (e) {
+                console.log(`image publishing to S3 failed: ${e}`)
+            }
+
             fs.writeFile(fileName, req.files.image.data, async (err) => {
                 if (err) throw err
                 const image = new Image()
@@ -42,6 +80,7 @@ export class ImagesController {
                 await image.save()
                 user.images.push(image.id)
                 await user.save()
+
                 return res.status(200).send({ message: 'image saved' })
             })
         } catch {
