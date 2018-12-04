@@ -162,7 +162,7 @@ returns
 ## Authenticated routes
 
 All other routes require a token in the `Authorization` header.
-Email needs to be confirmed to activate the token
+Email needs to be confirmed to activate the token (a confirmation will be sent on registering)
 
 **Confirm email**
 
