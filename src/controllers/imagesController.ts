@@ -20,21 +20,24 @@ export class ImagesController {
     s3: any
 
     constructor() {
+        if (!process.env.AZURE_KEY) {
+            throw new Error(`AZURE_KEY is mandatory!`)
+        }
         this.faceApi = new CognitiveServices.face(AzureOptions)
-        this.s3 = new S3()
         if (!process.env.AWS_S3_IMG_BUCKET) {
             throw new Error(`AWS_S3_IMG_BUCKET is mandatory!`)
         }
+        this.s3 = new S3()
     }
 
     private async storeImage(img, key) {
         const bucket = process.env.AWS_S3_IMG_BUCKET
-        // can throw
-        const _response1 = await this.s3.createBucket({
-            Bucket: bucket
-        }).promise()
-
-        console.log(`creating bucket ok: ${_response1}`)
+        try {
+            const response = await this.s3.createBucket({ Bucket: bucket }).promise()
+            console.log(`creating bucket ok: ${JSON.stringify(response)}`)
+        } catch (e) {
+            // the bucket probably already exists
+        }
 
         const payload = {
             Bucket: bucket,
@@ -42,13 +45,30 @@ export class ImagesController {
             Body: img
         }
 
-        const _response2 = await this.s3.putObject(payload).promise()
+        console.log(`key: ${key}`)
 
-        console.log(`added image to ${bucket}/${key}: ${_response2}`)
+        try {
+            const response = await this.s3.putObject(payload).promise()
+            return response
+        } catch (e) {
+            console.log(`couldn't add image to s3: ${e}`)
+        }
     }
 
-    public getImage(key) {
-        // this.s3.getObject()
+    public async getImage(key) {
+        const payload = {
+            Bucket: process.env.AWS_S3_IMG_BUCKET,
+            Key: key
+        }
+        try {
+            // const result = this.s3.getObject(payload).createReadStream()
+            const result = await this.s3.getObject(payload).promise()
+            const data = result.Body
+            const image = Buffer.from(data).toString('utf8')
+            return image
+        } catch (e) {
+            console.log(`couldn't get img: ${e}`)
+        }
     }
 
     // Add a image for the current user in azure cloud
@@ -65,7 +85,12 @@ export class ImagesController {
             const fileName = './img/' + id
 
             try {
-                this.storeImage(req.files.image.data, id)
+                const result = await this.storeImage(req.files.image.data, id)
+                console.log(`stored image: ${JSON.stringify(result)}`)
+                if (result) {
+                    const imageFromS3 = await this.getImage(id)
+                    console.log(`got image: ${imageFromS3}`)
+                }
             } catch (e) {
                 console.log(`image publishing to S3 failed: ${e}`)
             }
@@ -75,7 +100,7 @@ export class ImagesController {
                 const image = new Image()
                 image.path = fileName
                 image.faceId = await this.getFaceId(req.files.image.data)
-                console.log(image.faceId)
+                console.log(`Azure face id: ${image.faceId}`)
                 image.faceIdCreationDate = new Date()
                 await image.save()
                 user.images.push(image.id)
