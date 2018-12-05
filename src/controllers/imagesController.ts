@@ -19,6 +19,8 @@ export class ImagesController {
     faceApi: any
     s3: any
 
+    writeFile: (filename: string, data: any) => Promise<any> = promisify(fs.writeFile)
+
     constructor() {
         if (!process.env.AZURE_KEY) {
             throw new Error(`AZURE_KEY is mandatory!`)
@@ -45,8 +47,6 @@ export class ImagesController {
             Body: img
         }
 
-        console.log(`key: ${key}`)
-
         try {
             const response = await this.s3.putObject(payload).promise()
             return response
@@ -55,33 +55,52 @@ export class ImagesController {
         }
     }
 
-    public async getImage(key) {
+    public async getImage(key): Promise<string> {
+        const exists: (path: string) => Promise<boolean> = promisify(fs.exists)
+
+        const relativePath = `./${key}`
+
+        console.log(`trying to get image ${relativePath}`)
+
+        const fileExists = await exists(relativePath)
+
+        // if it exists on the local server, we can use it directly
+        if (fileExists) {
+            console.log(`found image locally`)
+            return await readFile(relativePath)
+        }
+
+        // otherwise, get it from S3 and cache it locally
+        console.log(`didn't find image locally: fetching from s3`)
+        const image = await this.getImageFromS3(key)
+        console.log(`ok, writing to disk`)
+        await this.writeFile(relativePath, image)
+        console.log(`ok`)
+
+        return image
+    }
+
+    public async getImageFromS3(key) {
         const payload = {
             Bucket: process.env.AWS_S3_IMG_BUCKET,
             Key: key
         }
-        try {
-            // const result = this.s3.getObject(payload).createReadStream()
-            const result = await this.s3.getObject(payload).promise()
-            const data = result.Body
-            const image = Buffer.from(data).toString('base64')
-            return image
-        } catch (e) {
-            console.log(`couldn't get img: ${e}`)
-        }
+
+        // can throw
+        const result = await this.s3.getObject(payload).promise()
+        return result.Body
     }
 
-    // Add a image for the current user in azure cloud
+    // Add a image for the current user in Azure cloud
     public async addImage(req: any, res: Response) {
         if (!req.files.image) {
             res.status(400).send({ message: 'image is mandatory' })
             return
         }
 
-        const { user } = req.body
+        const user: IUser = req.body.user
 
         const fileName = `images/${uuidv1()}`
-
         try {
             await this.storeImage(req.files.image.data, fileName)
         } catch (e) {
@@ -89,10 +108,8 @@ export class ImagesController {
             return res.status(500).send({ message: 'unable to upload image to S3' })
         }
 
-        const writeFile = promisify(fs.writeFile)
-
         try {
-            await writeFile(`./${fileName}`, req.files.image.data)
+            await this.writeFile(`./${fileName}`, req.files.image.data)
         } catch (e) {
             console.log(`writing image to disk failed: ${e}`)
             return res.status(500).send({ message: 'unable to write file to disk' })
@@ -105,6 +122,7 @@ export class ImagesController {
             console.log(`getting face id failed: ${e}`)
             return res.status(500).send({ message: 'unable to get faceId' })
         }
+
         const image = new Image()
         image.path = fileName
         image.faceId = faceId
@@ -129,26 +147,18 @@ export class ImagesController {
         return res.status(200).send({ message: 'image saved' })
     }
 
-    // Delete any information saved on azure microsoft.
+    // Delete any information saved on Microsoft Azure
     public async removeImage(req: Request, res: Response) {
-        if (req.body.faceId) {
+        if (!req.body.faceId) {
             res.status(400).send({ message: 'image faceId is mandatory' })
             return
         }
 
         const user: IUser = req.body.user
-        if (!user) return
+
         await user.populate('images').execPopulate()
 
-        let index = -1
-        for (let i = 0; i < user.images.length; i++) {
-            if (user.images[i].faceId === req.body.faceId) {
-                index = 1
-                break
-            }
-        }
-
-        if (index === -1) {
+        if (!user.images.find(i => i.faceId === req.body.faceId)) {
             return res.status(404).send({ message: 'image not found' })
         }
 
@@ -181,7 +191,7 @@ export class ImagesController {
             console.log(`verifyFace: did not find authorization ${req.body.requestId}`, e)
         }
 
-        const { user } = req.body
+        const user: IUser = req.body.user
 
         if (authorization.user.toString() !== user._id.toString()) {
             res.status(401).send({ message: 'this is not yours!' })
@@ -240,7 +250,7 @@ export class ImagesController {
                     faceId = imgModels[i].faceId
                 } else {
                     try {
-                        const file = await readFile(imgModels[i].path)
+                        const file = await this.getImage(imgModels[i].path)
                         faceId = await this.getFaceId(file)
                         imgModels[i].faceId = faceId
                         imgModels[i].faceIdCreationDate = new Date()
@@ -279,11 +289,11 @@ export class ImagesController {
                 res.status(500).send({ message: 'database error updating the authorization' })
             }
 
+            res.status(200).send({ message: 'ok' })
+
+            // Now we have to send the POST callback
             const payload = { tokenId: authorization._id }
             const token = jsonwebtoken.sign(payload, jwtOptions.secretOrKey)
-
-            // POST callback
-            res.status(200).send({ message: 'ok' })
 
             try {
                 await authorization.populate('company').execPopulate()
@@ -294,12 +304,13 @@ export class ImagesController {
 
             try {
                 await axios.post(authorization.company.callback, {
-                  requestId: authorization._id,
-                  validated: true,
-                  token: `bearer ${token}`
+                    requestId: authorization._id,
+                    validated: true,
+                    token: `bearer ${token}`
                 })
             } catch (e) {
-            console.log('could not send callback to the company:', e)
+                console.log('could not send callback to the company:', e)
+                return
             }
         } catch (err) {
             console.log('verifyFace error:', err)
@@ -328,6 +339,11 @@ export class ImagesController {
             body: image
         }
         const res = await this.faceApi.detect(payload)
+
+        if (res.length < 1) {
+            throw new Error('no face found')
+        }
+
         return res[0].faceId
      }
 }
