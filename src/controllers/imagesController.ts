@@ -55,27 +55,22 @@ export class ImagesController {
         }
     }
 
+    // get an image either from local of from S3
     public async getImage(key): Promise<string> {
         const exists: (path: string) => Promise<boolean> = promisify(fs.exists)
 
         const relativePath = `./${key}`
 
-        console.log(`trying to get image ${relativePath}`)
-
         const fileExists = await exists(relativePath)
 
         // if it exists on the local server, we can use it directly
         if (fileExists) {
-            console.log(`found image locally`)
             return await readFile(relativePath)
         }
 
         // otherwise, get it from S3 and cache it locally
-        console.log(`didn't find image locally: fetching from s3`)
         const image = await this.getImageFromS3(key)
-        console.log(`ok, writing to disk`)
         await this.writeFile(relativePath, image)
-        console.log(`ok`)
 
         return image
     }
