@@ -64,7 +64,7 @@ export class ImagesController {
             // const result = this.s3.getObject(payload).createReadStream()
             const result = await this.s3.getObject(payload).promise()
             const data = result.Body
-            const image = Buffer.from(data).toString('utf8')
+            const image = Buffer.from(data).toString('base64')
             return image
         } catch (e) {
             console.log(`couldn't get img: ${e}`)
@@ -80,37 +80,53 @@ export class ImagesController {
 
         const { user } = req.body
 
+        const fileName = `images/${uuidv1()}`
+
         try {
-            const id = uuidv1()
-            const fileName = './img/' + id
-
-            try {
-                const result = await this.storeImage(req.files.image.data, id)
-                console.log(`stored image: ${JSON.stringify(result)}`)
-                if (result) {
-                    const imageFromS3 = await this.getImage(id)
-                    console.log(`got image: ${imageFromS3}`)
-                }
-            } catch (e) {
-                console.log(`image publishing to S3 failed: ${e}`)
-            }
-
-            fs.writeFile(fileName, req.files.image.data, async (err) => {
-                if (err) throw err
-                const image = new Image()
-                image.path = fileName
-                image.faceId = await this.getFaceId(req.files.image.data)
-                console.log(`Azure face id: ${image.faceId}`)
-                image.faceIdCreationDate = new Date()
-                await image.save()
-                user.images.push(image.id)
-                await user.save()
-
-                return res.status(200).send({ message: 'image saved' })
-            })
-        } catch {
-            return res.status(500).send({ message: 'unable to upload file' })
+            await this.storeImage(req.files.image.data, fileName)
+        } catch (e) {
+            console.log(`publishing image in S3 failed: ${e}`)
+            return res.status(500).send({ message: 'unable to upload image to S3' })
         }
+
+        const writeFile = promisify(fs.writeFile)
+
+        try {
+            await writeFile(`./${fileName}`, req.files.image.data)
+        } catch (e) {
+            console.log(`writing image to disk failed: ${e}`)
+            return res.status(500).send({ message: 'unable to write file to disk' })
+        }
+
+        let faceId: string
+        try {
+            faceId = await this.getFaceId(req.files.image.data)
+        } catch (e) {
+            console.log(`getting face id failed: ${e}`)
+            return res.status(500).send({ message: 'unable to get faceId' })
+        }
+        const image = new Image()
+        image.path = fileName
+        image.faceId = faceId
+        image.faceIdCreationDate = new Date()
+
+        try {
+            await image.save()
+        } catch (e) {
+            console.log(`saving image failed: ${e}`)
+            return res.status(500).send({ message: 'unable to save image' })
+        }
+
+        user.images.push(image.id)
+
+        try {
+            await user.save()
+        } catch (e) {
+            console.log(`adding image to user failed: ${e}`)
+            return res.status(500).send({ message: 'unable to add image to user' })
+        }
+
+        return res.status(200).send({ message: 'image saved' })
     }
 
     // Delete any information saved on azure microsoft.
