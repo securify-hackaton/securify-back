@@ -120,7 +120,7 @@ class App {
 
             // for all authenticated routes except 'new confirmation email',
             // email must be validated
-            if (!usr.emailValidated && (req.method !== 'POST' || req.originalUrl === '/confirm')) {
+            if (!usr.emailValidated && (req.method !== 'POST' || req.originalUrl !== '/confirm')) {
               return res.status(401).send({ message: 'email must be confirmed' })
             }
 
