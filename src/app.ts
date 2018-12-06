@@ -159,9 +159,26 @@ class App {
             await auth.populate('user').execPopulate()
 
             // make the known information available when handling the request
-            req.body.user = auth.user
-            req.body.company = auth.company
-            req.body.token = auth
+            req.body.company = {
+              name: auth.company.name,
+              image: auth.company.image,
+              callback: auth.company.callback,
+              scopes: auth.company.scopes,
+              createdDate: auth.company.createdDate
+            }
+
+            // make available only the scoped information
+            const scopes = {
+              email: ['email'],
+              fullname: ['firstName', 'lastName'],
+              age: []
+            }
+            req.body.user = { }
+            auth.scopes.split(';').forEach(s => {
+              scopes[s].forEach(prop => {
+                req.body.user[prop] = auth.user[prop]
+              })
+            })
           } catch (e) {
             return res.status(501).send({ message: 'database error: ' + e })
           }
