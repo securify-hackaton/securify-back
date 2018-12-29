@@ -2,3 +2,4 @@ node_modules
 secret.env
 .env
 images/*
+package-lock.json

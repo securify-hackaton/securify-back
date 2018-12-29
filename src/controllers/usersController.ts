@@ -5,7 +5,6 @@ import { randomBytes } from 'crypto'
 
 import { User, IUser } from '../models/User'
 import { jwtOptions } from '../config/jwt'
-import { userInfo } from 'os';
 
 export class UsersController {
   public addNewUser (req: Request, res: Response): Response {
