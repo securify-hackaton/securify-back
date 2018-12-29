@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Securify: Reset your password</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" media="screen" href="main.css" />
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.js"></script>
+
+</head>
+<body>
+    <div id="dancing-man"></div>
+    <div id="app">
+        <h1>Reset your password</h1>
+        <br>
+        <div class="form" v-if="!done">
+            <template v-if="error">
+                <br>
+                <p class="error" v-html="error" />
+                <br>
+                <br>
+            </template>
+            <template v-else>
+                <input class="input" type="password" v-model="password" placeholder="New password" /><br>
+                <input class="button" type="submit" value="Change" @click="submit" />
+            </template>
+        </div>
+        <h2 v-else>
+            OK!
+        </h2>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>

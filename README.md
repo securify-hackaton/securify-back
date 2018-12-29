@@ -161,6 +161,38 @@ returns
 }
 ```
 
+**Reset password**
+
+Ask for a password reset link
+```
+POST /forgot
+{
+    email: string
+}
+```
+returns
+```
+{
+    message: string
+}
+```
+
+Display the password reset page
+```
+GET /reset?email={email}&key={key}
+```
+returns an HTML page
+
+Reset your password
+```
+POST /reset
+{
+    email: string
+    key: string
+    password: string
+}
+
+
 ## Authenticated routes
 
 All other routes require a token in the `Authorization` header.
@@ -184,7 +216,7 @@ returns
 
 Get the logged user info
 ```
-GET /
+GET /profile
 ```
 returns
 ```

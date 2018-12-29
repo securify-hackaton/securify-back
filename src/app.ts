@@ -38,10 +38,14 @@ class App {
       'JWT_KEY',
       'GMAIL_USERNAME',
       'GMAIL_PASSWORD',
-      'DEPLOY_URL'
+      'DEPLOY_URL',
+      'AZURE_KEY',
+      'AWS_ACCESS_KEY_ID',
+      'AWS_SECRET_ACCESS_KEY',
+      'AWS_S3_IMG_BUCKET'
     ].forEach(v => {
       if (!process.env[v]) {
-        throw new Error(`${v} is mandatory`)
+        throw new Error(`$${v} is mandatory`)
       }
     })
   }
@@ -78,8 +82,16 @@ class App {
         if (req.method === 'POST' && req.originalUrl === '/authorize') {
           return next()
         }
+        // reset password flow => ok
+        if (req.method === 'POST' && (req.originalUrl === '/reset' || req.originalUrl === '/forgot')) {
+          return next()
+        }
         // sdk website => ok
         if (req.method === 'GET' && /\/sdk(.*)/.test(req.originalUrl)) {
+          return next()
+        }
+        // reset password website => ok
+        if (req.method === 'GET' && /\/reset(.*)/.test(req.originalUrl)) {
           return next()
         }
         // email confirmation => ok

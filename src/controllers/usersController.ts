@@ -88,6 +88,50 @@ export class UsersController {
     return res.status(200).send({ message: 'email validated' })
   }
 
+  public async resetPassword (req: Request, res: Response): Promise<Response> {
+    const { email, key, password } = req.body
+
+    if (!email) {
+      return res.status(400).send({ message: 'email is required' })
+    }
+
+    if (!key) {
+      return res.status(400).send({ message: 'key is required' })
+    }
+
+    let users: IUser[]
+    try {
+      users = await User.find({ email }).exec()
+    } catch (e) {
+      console.log(`resetPassword: fetching user failed: ${e}`)
+      return res.status(500).send({ message: 'server error' })
+    }
+
+    if (users.length !== 1) {
+      console.log(`found ${users.length} users instead of 1`)
+      return res.status(400).send({ message: 'email not found' })
+    }
+
+    const user = users[0]
+
+    if (!user.validResetPassword(key)) {
+      return res.status(400).send({ message: 'invalid key' })
+    }
+
+    user.setPassword(password)
+    // make sure the same key can't be used several times
+    user.setResetPasswordKey(randomBytes(16).toString('hex'))
+
+    try {
+      await user.save()
+    } catch (e) {
+      console.log(`couldn't reset user password: ${e}`)
+      return res.status(500).send({ message: 'server error' })
+    }
+
+    return res.status(200).send({ message: 'password successfully reset' })
+  }
+
   public async getUsers (_: Request, res: Response): Promise<Response> {
     try {
       const users = await User.find({}).exec()
@@ -135,7 +179,7 @@ export class UsersController {
 
   public async getUserByID (req: Request, res: Response): Promise<Response> {
     try {
-      const user = User.findById(req.params.userId).exec()
+      const user = await User.findById(req.params.userId).exec()
 
       if (!user) {
         return res.status(404).send({ message: `user not found: ${req.params.userId}` })
@@ -145,6 +189,22 @@ export class UsersController {
     } catch (e) {
       return res.send({ message: e })
     }
+  }
+
+  private async getUserByEmail (email: string): Promise<IUser> {
+    let user: IUser
+    try {
+      user = await User.findOne({ email }).exec()
+    } catch (e) {
+      console.log(`didn't find user ${email}`)
+      throw e
+    }
+
+    if (!user) {
+      throw new Error(`didn't find user`)
+    }
+
+    return user
   }
 
   public async updateUser (req: Request, res: Response): Promise<Response> {
@@ -187,6 +247,71 @@ export class UsersController {
       console.log(`couldn't send confirmation email: ${e}`)
       return res.status(500).send({ message: `couldn't send the confirmation` })
     }
+  }
+
+  public async askPasswordReset(req: Request, res: Response): Promise<Response> {
+    const username = process.env.GMAIL_USERNAME
+    const password = process.env.GMAIL_PASSWORD
+    const securify = process.env.DEPLOY_URL
+
+    const { email } = req.body
+
+    let user: IUser
+
+    try {
+      user = await this.getUserByEmail(email)
+    } catch (e) {
+      console.log(`askPasswordReset: failed with error ${e}`)
+      return res.status(400).send({ message: `didn't find user ${email} `})
+    }
+
+    const key = randomBytes(16).toString('hex')
+
+    user.setResetPasswordKey(key)
+
+    try {
+      user = await user.save()
+    } catch (e) {
+      console.log(`askPasswordReset: saving user failed: ${e}`)
+      return res.status(500).send({ message: 'saving user failed' })
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: username,
+        pass: password
+      }
+    })
+
+    const mailOptions = {
+      from: username,
+      to: user.email,
+      subject: 'Reset your password on Securify',
+      html: `<p>Hello ${user.firstName}.<br><br>Please follow this link to reset your password: ${securify}/reset?email=${user.email}&key=${key}.</p>`
+    }
+
+    const sendMail = (mailOptions) => new Promise<any>((resolve, reject) => {
+      transporter.sendMail(mailOptions, (err: Error, data) => {
+        if (err) {
+          return reject(err)
+        } else {
+          return resolve(data)
+        }
+      })
+    })
+
+    let info
+    try {
+      info = await sendMail(mailOptions)
+    } catch (e) {
+      console.log(`error sending mail: ${e}`)
+      throw e
+    }
+
+    console.log(`mail ok: ${JSON.stringify(info)}`)
+
+    return res.status(200).send({ message: 'ok: check your mails' })
   }
 
   private async sendVerificationMail(user: IUser): Promise<void> {
