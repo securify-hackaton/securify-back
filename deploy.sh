@@ -7,13 +7,8 @@
 ## Create a security group to allow http and https
 ## Add the security group to the EC2 instance
 
-# Dependencies
-curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
-sudo yum install -y nodejs git
-sudo npm i -g typescript pm2
-sudo amazon-linux-extras install nginx1.12
-
 # Nginx
+sudo amazon-linux-extras install nginx1.12
 sudo systemctl start nginx
 sudo vi /etc/nginx/nginx.conf
 # location /.well-known {
@@ -44,10 +39,14 @@ sudo npm i -g greenlock-cli
 sudo greenlock certonly --webroot --acme-version draft-11 --acme-url https://acme-v02.api.letsencrypt.org/directory --agree-tos --email thomas@sauvajon.tech --domains securify.tsauvajon.eu --community-member --root /home/ec2-user/back/dist/sdk --config-dir /etc/letsencrypt
 sudo service nginx restart
 
+# Node
+curl --silent --location https://rpm.nodesource.com/setup_10.x | sudo bash -
+sudo yum install -y nodejs git
+
 # PM2
+sudo npm i -g typescript pm2
 pm2 startup systemd
 # run the `env` command issued by pm2
-pm2 save
 
 # Configuration
 vi ~/.bash_profile # setup required env variables
@@ -63,6 +62,7 @@ cp -r sdk dist
 # Run
 cd ~/back/dist
 pm2 start server.js
+pm2 save
 
 ##### RUN
 

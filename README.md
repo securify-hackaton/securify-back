@@ -28,14 +28,16 @@ Open a terminal in the `back` folder
 npm i
 
 # Setup the config
-# Linux / MacOS
-export MONGODB_URI=mongodb://poiuytreza:XbNZvpF7MVwZL45@ds151004.mlab.com:51004/gilet-jaune
-export JWT_KEY=est-ceQueCeMot2PasseEst(très)DifficileàTrouver?Oui_ça_va!
-export AZURE_KEY=648eb5213a444a3c8e55e491447ed052
-# Windows
-set MONGODB_URI=mongodb://poiuytreza:XbNZvpF7MVwZL45@ds151004.mlab.com:51004/gilet-jaune
-set JWT_KEY=est-ceQueCeMot2PasseEst(très)DifficileàTrouver?Oui_ça_va!
-set AZURE_KEY=648eb5213a444a3c8e55e491447ed052
+# Linux / MacOS (for Windows use SET instead of export)
+export MONGODB_URI=[full uri with protocol, login, password and database]
+export JWT_KEY=[secret]
+export GMAIL_USERNAME=[address@gmail.com]
+export GMAIL_PASSWORD=[password]
+export DEPLOY_URL=http://localhost:3000
+export AZURE_KEY=[Face API key]
+export AWS_ACCESS_KEY_ID=[AWS access key with a S3 scope]
+export AWS_SECRET_ACCESS_KEY=[secret]
+export AWS_S3_IMG_BUCKET=securify
 
 # Run the server
 npm run start
@@ -162,10 +164,25 @@ returns
 ## Authenticated routes
 
 All other routes require a token in the `Authorization` header.
+Email needs to be confirmed to activate the token (a confirmation will be sent on registering)
+
+**Confirm email**
+
+Send a new confirmation email
+```
+POST /confirm
+{ }
+```
+returns
+```
+{ 
+    message: string
+}
+```
 
 **ME**
 
-Get the logged user
+Get the logged user info
 ```
 GET /
 ```

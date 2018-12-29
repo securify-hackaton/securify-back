@@ -1,5 +1,6 @@
 import { Schema, Document, model, Model } from 'mongoose'
 import { pbkdf2Sync, randomBytes } from 'crypto'
+
 import { IImage } from './Image'
 
 export const UserSchema = new Schema({
@@ -32,6 +33,12 @@ export const UserSchema = new Schema({
     type: Boolean,
     default: false
   },
+  emailValidationKeyHash: {
+    type: String,
+  },
+  emailValidationKeySalt: {
+    type: String,
+  },
   salt: {
     type: String
   },
@@ -45,6 +52,32 @@ export const UserSchema = new Schema({
 })
 
 UserSchema.methods = {
+  validEmailConfirmation(key: string) {
+    if (!this.emailValidationKeyHash) return false
+
+    const hash = pbkdf2Sync(
+      key,
+      this.emailValidationKeySalt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    return hash.toString('hex') === this.emailValidationKeyHash
+  },
+
+  setEmailConfirmationKey(key: string) {
+    this.emailValidationKeySalt = randomBytes(16).toString('hex')
+    const hash = pbkdf2Sync(
+      key,
+      this.emailValidationKeySalt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    this.emailValidationKeyHash = hash.toString('hex')
+  },
   validPassword(password: string) {
     if (!this.hash) return false
 
@@ -81,9 +114,13 @@ export interface IUser extends Document {
   deviceId: string
   deviceType: string
   emailValidated: boolean
+  emailValidationKeyHash: string
+  emailValidationKeySalt: string
   hash: string
   salt: string
   created_date: Date
+  validEmailConfirmation: (key: string) => boolean
+  setEmailConfirmationKey: (key: string) => void
   validPassword: (password: string) => boolean
   setPassword: (password: string) => void
 }
