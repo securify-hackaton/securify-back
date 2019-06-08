@@ -1,5 +1,8 @@
 # Securify
 
+<img src="https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/logo_512px.png" height="300" width="300" />  
+
+
 ## Abstract
 
 ### Ecosystem
