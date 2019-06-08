@@ -27,7 +27,17 @@ export class Routes {
         })
       })
 
-    app.use('/sdk', express.static('sdk'))
+    app.route('/profile')
+      .get((req: Request, res: Response) => {
+        res.status(200).send({
+          message: 'Securify API v1.0.0',
+          user: req.body.user,
+          company: req.body.company
+        })
+      })
+
+    app.use('/sdk', express.static('front/sdk'))
+    app.use('/reset', express.static('front/reset'))
 
     app.route('/login')
       .post(this.usersController.login)
@@ -44,6 +54,11 @@ export class Routes {
     app.route('/confirm')
       .get(this.usersController.confirmEmail)
       .post(this.usersController.newConfirmationEmail)
+
+    app.route('/forgot')
+      .post(this.usersController.askPasswordReset.bind(this.usersController))
+    app.route('/reset')
+      .post(this.usersController.resetPassword)
 
     app.route('/users/:userId')
       .get(this.usersController.getUserByID)

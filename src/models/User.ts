@@ -39,6 +39,12 @@ export const UserSchema = new Schema({
   emailValidationKeySalt: {
     type: String,
   },
+  resetPasswordKeyHash: {
+    type: String,
+  },
+  resetPasswordKeySalt: {
+    type: String,
+  },
   salt: {
     type: String
   },
@@ -78,6 +84,34 @@ UserSchema.methods = {
 
     this.emailValidationKeyHash = hash.toString('hex')
   },
+
+  validResetPassword(key: string) {
+    if (!this.resetPasswordKeyHash) return false
+
+    const hash = pbkdf2Sync(
+      key,
+      this.resetPasswordKeySalt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    return hash.toString('hex') === this.resetPasswordKeyHash
+  },
+
+  setResetPasswordKey(key: string) {
+    this.resetPasswordKeySalt = randomBytes(16).toString('hex')
+    const hash = pbkdf2Sync(
+      key,
+      this.resetPasswordKeySalt,
+      10000,
+      512,
+      'sha512'
+    )
+
+    this.resetPasswordKeyHash = hash.toString('hex')
+  },
+
   validPassword(password: string) {
     if (!this.hash) return false
 
@@ -114,11 +148,15 @@ export interface IUser extends Document {
   deviceId: string
   deviceType: string
   emailValidated: boolean
+  resetPasswordKeyHash: string
+  resetPasswordKeySalt: string
   emailValidationKeyHash: string
   emailValidationKeySalt: string
   hash: string
   salt: string
   created_date: Date
+  validResetPassword: (key: string) => boolean
+  setResetPasswordKey: (key: string) => void
   validEmailConfirmation: (key: string) => boolean
   setEmailConfirmationKey: (key: string) => void
   validPassword: (password: string) => boolean

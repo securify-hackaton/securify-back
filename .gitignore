@@ -3,3 +3,4 @@ secret.env
 .env
 images/*
 package-lock.json
+dist

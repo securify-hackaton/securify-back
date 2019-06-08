@@ -1,0 +1,92 @@
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+#dancing-man {
+    background-image: url('./img/background.png');
+    background-repeat: no-repeat;
+    background-position: bottom;
+    height: 100%;
+    width: 400px;
+    right: 100px;
+    bottom: 0;
+    position: fixed;
+    z-index: -500;
+}
+
+.button {
+    border: none;
+    color: white;
+    background: #1DB954;
+    border-radius: 25px;
+    padding: 10px 20px;
+    cursor: pointer;
+    outline: none;
+    font-family: "arial";
+    font-size: 1rem;
+}
+
+.result {
+    text-align: left;
+}
+
+#app {
+    margin-top: 50px;
+    text-align: center;
+    width: 600px;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: 15px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 50px;
+}
+
+h1 {
+    font-family: 'arial';
+    font-size: 5rem;
+    letter-spacing: 3px;
+    color: #fff;
+}
+
+body {
+    background: radial-gradient(ellipse at center, #f6cb6c 0%, #f3c65d 0%, #f2ae54 100%);
+    height: 100%;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background-size: cover;
+}
+
+.input {
+    border: none;
+    color: white;
+    background: #222;
+    border-radius: 3px;
+    padding: 10px 20px;
+    outline: none;
+    font-family: "arial";
+    font-size: 1rem;
+}
+
+.label {
+    font-family: "arial";
+    font-size: 1rem;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 250px;
+    font-family: "arial";
+    font-size: 1rem;
+}

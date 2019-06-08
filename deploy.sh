@@ -75,5 +75,5 @@ cd ~/back
 git pull
 npm i
 npm run build
-cp -r sdk dist
+cp -r front dist
 pm2 restart server # --update-env
