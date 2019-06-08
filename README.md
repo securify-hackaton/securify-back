@@ -1,22 +1,70 @@
-# back
+# Securify
 
+Back-end: this repo  
+Front-end: https://github.com/securify-hackaton/front  
+Mock websites: https://github.com/securify-hackaton/mock
+
+# Abstract
+
+Securify is a mobile authentication application. It was built in 3 days and won the first place (out of 80 projects) during the 2018 [EPSI Engineering school](http://www.epsi.fr/) hackaton.  
+  
+Websites can add a "Connect with Securify" button to let their users login with Securify as they would with Google or Facebook.  
+
+Users can allow or deny logins in the Securify mobile app, using their password or facial recognition, and chose what personal data they allow the website to use.
+They can then review the allowed connections and revoke them at any time.  
+
+### What Securify can do for end users
+
+- ability to chose what personal data 3rd party websites can access
+- 1 password for every website
+- centralised identity
+- easily revoke an access
+
+### And for website developers
+- let Securify handle authentication for you
+- let Securify manage RGPD compliance and user data for you
+- simplify user experience
+
+### Use cases
+
+- I have a Netflix account I want to use on a friend's PC, but don't want to give him my password.
+- I want to login into my bank account on a public PC but do not want to type in my password.
+- I am using my social media account on someone else's device and want to be able to disconnect remotely, from my mobile phone.
+- I want to only remember 1 strong password and still have strong security than having a different password for every website.
+- I don't want to use passwords at all and I'd rather unlock websites with facial recognition (working perfectly) or fingerprints (needs to be implemented)
+
+# Tech stack
+
+### Back-end
+We chose to use Node.js with TypeScript to speed up the development and have a rapidly working yet robust prototype.
+User data is stored in a MongoDB database, images for facial recognition are stored in AWS S3 (inages metadata in Mongo, binary data in S3) and uses Microsoft Azure Face API to verify face matching.
+Authentication is secured with JWT tokens, both between the mobile app and Securify's servers, and between 3rd party websites and Securify's servers. Each token has a scope of data it can use (email address, age, real name, nationality...) and can be revoked at any time.
+Using socket.io allowed us to keep open a socket connection, and to log users in without needing them to refresh their page.
+We used the gmail API with a freshly created gmail account to send email address verification emails. While this allowed us to be able to send mails quickly and easily, this would have to be changed for production.
+Database (MongoDB) hosted on Atlas, server hosted on Heroku.
+
+### Mock websites
+Vue.js, CSS, Node.js+TypeScript, socket.io. Hosted on Heroku.
+
+### Mobile app
+See https://github.com/securify-hackaton/front
 
 # Getting started
 
-## Choice 1: use our demo
+## Option 1: use our demo
 
-1/
+1/  
 Install Securify on your mobile phone:
-- Android: search "Securify" on the Google Play Store search
+- Android: search "Securify" on the Google Play Store
 - iOS: not available yet, because it costs 90€/year to list an app
-Create an account (with an email you will remember)
+Create an account (with an email you will remember).
 
-2/
+2/  
 Netflic example: https://securify-netflic.herokuapp.com  
 Spautify example: https://securify-spautify.herokuapp.com  
 Epsy example: https://securify-epsy.herokuapp.com  
 
-## Choice 2: setup your own servers
+## Option 2: setup your own servers
 
 Install [Node.js LTS](https://nodejs.org/en/download/) 
 
@@ -46,17 +94,17 @@ npm run start
 # Name: full text name, e.g. "EPSI"
 # Logo: image URL, e.g. "https://pbs.twimg.com/profile_images/1024649812988387328/QWQbqff7_400x400.jpg"
 # Callback URL: http://localhost:3001/callback
-http://localhost:3000/sdk
+echo http://localhost:3000/sdk
 
 # Don't close the tab, you will need the public and private key!
 ```
 
 **Mobile app**
 
-- Follow the README at https://gitlab.com/voauth/securify-front to run the server
+- Follow the README at https://github.com/securify-hackaton/securify-front to run the app
 - Install Expo on your mobile phone (iOS or Android) and scan the QR code
 - Register with a valid email
-- Upload 3 pictures
+- Upload at least 3 pictures
 
 **Mock website**
 
@@ -67,8 +115,8 @@ npm i
 
 # Setup the config
 # Linux / MacOS
-export PRIVATE_KEY=[your private key]
-export PUBLIC_KEY=[your public key]
+export PRIVATE_KEY=[your private key, found when creating a dev account at http://localhost:3000/sdk]
+export PUBLIC_KEY=[your public key, found when creating a dev account at http://localhost:3000/sdk]
 export SECURIFY_URL=http://localhost:3000/authorize
 # Windows
 set PRIVATE_KEY=[your private key]
@@ -101,7 +149,7 @@ POST /users
 ```
 returns
 ```
-{
+{git@github.com:securify-hackaton/back.git
     user: User
     token: string
 }
