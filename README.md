@@ -233,7 +233,7 @@ POST /users
 ```
 returns
 ```
-{git@github.com:securify-hackaton/back.git
+{
     user: User
     token: string
 }
@@ -293,7 +293,7 @@ returns
 }
 ```
 
-**Reset password**
+### Reset password
 
 Ask for a password reset link
 ```
@@ -309,11 +309,13 @@ returns
 }
 ```
 
+![password reset email](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/reset-password.jpg)
+
 Display the password reset page
 ```
 GET /reset?email={email}&key={key}
 ```
-returns an HTML page
+returns an HTML page that allows the user to update their password
 
 Reset your password
 ```
@@ -323,7 +325,7 @@ POST /reset
     key: string
     password: string
 }
-
+```
 
 ## Authenticated routes
 
@@ -343,6 +345,8 @@ returns
     message: string
 }
 ```
+
+![email address confirmation email](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/confirm-email.jpg)
 
 ### ME
 
