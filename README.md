@@ -1,6 +1,6 @@
 # Securify
 
-<img src="https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/logo_512px.png" height="300" width="300" style="background: #000; padding: 10px" />  
+<img src="https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/logo.png" height="300" width="300" />  
 
 
 ## Abstract
