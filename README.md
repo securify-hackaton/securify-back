@@ -11,6 +11,13 @@ Back-end: this repo
 Front-end: https://github.com/securify-hackaton/front  
 Mock websites: https://github.com/securify-hackaton/mock
 
+
+### Videos
+
+Demo video (French): https://www.youtube.com/watch?v=nHXzEYyTn3I  
+
+Pitch video (French): https://www.youtube.com/watch?v=LLz6NvmT7QM&  
+
 ### Overview
 
 Securify is a mobile authentication application. It was built in 3 days and won the first place (out of 80 projects) during the 2018 [EPSI Engineering school](http://www.epsi.fr/) hackaton.  
