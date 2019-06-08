@@ -1,10 +1,14 @@
 # Securify
 
+## Abstract
+
+### Ecosystem
+
 Back-end: this repo  
 Front-end: https://github.com/securify-hackaton/front  
 Mock websites: https://github.com/securify-hackaton/mock
 
-# Abstract
+### Overview
 
 Securify is a mobile authentication application. It was built in 3 days and won the first place (out of 80 projects) during the 2018 [EPSI Engineering school](http://www.epsi.fr/) hackaton.  
   
@@ -33,7 +37,7 @@ They can then review the allowed connections and revoke them at any time.
 - I want to only remember 1 strong password and still have strong security than having a different password for every website.
 - I don't want to use passwords at all and I'd rather unlock websites with facial recognition (working perfectly) or fingerprints (needs to be implemented)
 
-# Tech stack
+## Tech stack
 
 ### Back-end
 We chose to use Node.js with TypeScript to speed up the development and have a rapidly working yet robust prototype.
@@ -49,17 +53,19 @@ Vue.js, CSS, Node.js+TypeScript, socket.io. Hosted on Heroku.
 ### Mobile app
 See https://github.com/securify-hackaton/front
 
-# Getting started
+## Getting started
 
 ## Option 1: use our demo
 
-1/  
+### Step 1
+
 Install Securify on your mobile phone:
 - Android: search "Securify" on the Google Play Store
 - iOS: not available yet, because it costs 90€/year to list an app
 Create an account (with an email you will remember).
 
-2/  
+### Step 2
+
 Netflic example: https://securify-netflic.herokuapp.com  
 Spautify example: https://securify-spautify.herokuapp.com  
 Epsy example: https://securify-epsy.herokuapp.com  
@@ -68,7 +74,7 @@ Epsy example: https://securify-epsy.herokuapp.com
 
 Install [Node.js LTS](https://nodejs.org/en/download/) 
 
-**Back end**
+### Back end
 
 Open a terminal in the `back` folder
 ```sh
@@ -99,14 +105,14 @@ echo http://localhost:3000/sdk
 # Don't close the tab, you will need the public and private key!
 ```
 
-**Mobile app**
+### Mobile app
 
 - Follow the README at https://github.com/securify-hackaton/securify-front to run the app
 - Install Expo on your mobile phone (iOS or Android) and scan the QR code
 - Register with a valid email
 - Upload at least 3 pictures
 
-**Mock website**
+### Mock website
 
 Open another terminal in the `mock` repo
 ```sh
@@ -134,7 +140,7 @@ http://localhost:3001/
 
 ## Unauthenticated routes
 
-**REGISTER**
+### REGISTER
 
 ```
 POST /users
@@ -155,7 +161,7 @@ returns
 }
 ```
 
-**LOGIN**
+### LOGIN
 
 Login with an email and a picture
 ```
@@ -173,7 +179,7 @@ returns
 }
 ```
 
-**New Dev account**
+### New Dev account
 
 Create a developper account
 ```
@@ -191,7 +197,7 @@ returns
 }
 ```
 
-**Authorize**
+### Authorize
 
 Ask for an authentication
 ```
@@ -214,7 +220,7 @@ returns
 All other routes require a token in the `Authorization` header.
 Email needs to be confirmed to activate the token (a confirmation will be sent on registering)
 
-**Confirm email**
+### Confirm email
 
 Send a new confirmation email
 ```
@@ -228,7 +234,7 @@ returns
 }
 ```
 
-**ME**
+### ME
 
 Get the logged user info
 ```
@@ -242,7 +248,7 @@ returns
 }
 ```
 
-**Pending Authorizations**
+### Pending Authorizations
 
 Pending authorizations for the logged in user
 ```
@@ -263,7 +269,7 @@ returns
 ]
 ```
 
-**Active Authorizations**
+### Active Authorizations
 
 Active authorizations for the logged in user
 ```
@@ -284,7 +290,7 @@ returns
 ]
 ```
 
-**Revoke an Authorization**
+### Revoke an Authorization
 
 Unvalidate any of the logged in user's tokens
 ```
