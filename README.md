@@ -15,7 +15,9 @@ Securify is a mobile authentication application. It was built in 3 days and won 
 Websites can add a "Connect with Securify" button to let their users login with Securify as they would with Google or Facebook.  
 
 Users can allow or deny logins in the Securify mobile app, using their password or facial recognition, and chose what personal data they allow the website to use.
-They can then review the allowed connections and revoke them at any time.  
+They can then review the allowed connections and revoke them at any time:  
+
+![active tokens](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/active-tokens.jpg)
 
 ### What Securify can do for end users
 
@@ -52,6 +54,79 @@ Vue.js, CSS, Node.js+TypeScript, socket.io. Hosted on Heroku.
 
 ### Mobile app
 See https://github.com/securify-hackaton/front
+
+## Workflow: authenticate by facial recognition
+
+![auth workflow schema](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/authentication-schema.jpg)
+
+Left hand side: mock website (exemple here: Netflix).  
+Middle: back-end.  
+Right hand side: mobile app (front-end).  
+
+(0) User clicks "Connect with Securify" and inputs his email address  
+![user input his email address on Netflix](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/mock-netflix.png)
+
+(1) POST query from Mock-Website-Frontend to Mock-Website-Backend
+```
+POST
+{
+    user email
+}
+```
+
+(2) POST query from Mock-Website-Backend to Securify-Backend
+```
+POST
+{
+    mock website authentication key
+    user email
+}
+
+returns
+{
+    authentication request ID
+}
+```
+
+(2.5) Create an "authentication request" in the database  
+
+(3) PUSH notification from Securify-Backend to the correct mobile (identified by user email address)
+```
+{
+    company
+    authentication request ID
+}
+```
+![mobile notification: authentication request](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/notification.jpg)
+Securify: Authentication request
+
+(4) Display "Company X wants you to authenticate: Allow/Deny" on the mobile phone:
+![netflix wants you to authenticate](https://raw.githubusercontent.com/securify-hackaton/securify-back/master/readme-img/netflix.jpg)
+
+(4.5) If the user clicks allow, the mobile app will take a picture from the camera
+
+(5) POST query from Securify-Frontend to Securify-Backend
+```
+POST
+{
+    allow: boolean
+    picture
+    authentication request ID
+}
+```
+
+(5.5) Check with Azure Face API that the image matches
+
+(6) POST query from Securify-Backend to Mock-Website-Backend, on the callback URL specified by the Mock Website.
+```
+POST
+{
+    allow: boolean
+    authentication request ID
+}
+```
+
+(7) Socket: allow or deny the authentication. If the user clicked "Allow" on the mobile app and the image matched, the user will now be authenticated with Netflix.
 
 ## Getting started
 
