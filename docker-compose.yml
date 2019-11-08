@@ -1,0 +1,62 @@
+version: '3.7'
+
+services:
+  mongo:
+    networks:
+      - db
+
+  app:
+    # build local dockerfile
+    # setup SSL certificates:
+    # https://github.com/JrCs/docker-letsencrypt-nginx-proxy-companion#step-3---proxyed-containers
+    networks:
+      - db
+
+  front-netflix:
+    # get from docker hub
+    # all 3 fronts: setup SSL certificates as well
+
+  front-spotify:
+    # get from docker hub
+
+  front-website:
+    # get from docker hub
+
+  proxy:
+    image: jwilder/nginx-proxy:alpine
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
+    volumes:
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+    networks:
+      - proxy-tier
+
+  letsencrypt-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-tier
+    depends_on:
+      - proxy
+
+volumes:
+  db:
+  certs:
+  vhost.d:
+  html:
+
+networks:
+  proxy-tier:
+  db:

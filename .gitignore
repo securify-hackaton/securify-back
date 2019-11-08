@@ -1,6 +1,5 @@
 node_modules
-secret.env
-.env
+*.env
 images/*
 package-lock.json
 dist
