@@ -23,7 +23,7 @@ services:
     # get from docker hub
 
   proxy:
-    image: jwilder/nginx-proxy:alpine
+    image: jwilder/nginx-proxy@sha256:249ca7ae4a123f25ddcdb76081a06fabc012e8203e6701564593cedcf562f685 # alpine
     restart: always
     ports:
       - 80:80
@@ -39,7 +39,7 @@ services:
       - proxy-tier
 
   letsencrypt-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    image: jrcs/letsencrypt-nginx-proxy-companion:v1.12
     restart: always
     volumes:
       - certs:/etc/nginx/certs
