@@ -1,5 +1,5 @@
 export const jwtOptions = {
   secretOrKey: process.env.JWT_KEY,
-  issuer: 'auth.giletjaune.com',
-  audience: 'giletjaune.com',
+  issuer: 'auth.tsauvajon.eu',
+  audience: 'tsauvajon.eu',
 }
