@@ -5,7 +5,7 @@
     "@types/mongodb": "^3.1.14",
     "@types/mongoose": "^5.3.1",
     "@types/socket.io": "^2.1.0",
-    "aws-sdk": "^2.369.0",
+    "aws-sdk": "^2.814.0",
     "axios": "^0.18.0",
     "body-parser": "^1.18.3",
     "cognitive-services": "^1.2.1",
